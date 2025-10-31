@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Login from './pages/Login'
+import LoginForm from './pages/LoginForm'
 
 
 function App() {
@@ -7,7 +8,8 @@ function App() {
 
   return (
     <div className="App">
-      <Login />
+  {/* keep original Login component for now; render interactive LoginForm */}
+  <LoginForm />
     </div>
   )
 }
