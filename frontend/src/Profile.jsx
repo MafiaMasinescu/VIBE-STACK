@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import Calendar from "./Components/Calendar";
 import "./Profile.css";
 
 // Position hierarchy for each department
@@ -15,7 +16,7 @@ const POSITION_HIERARCHY = {
     "HR Coordinator",
     "HR Assistant",
     "Recruiter",
-    "Talent Acquisition Specialist"
+    "Talent Acquisition Specialist",
   ],
   Developer: [
     "CTO",
@@ -30,7 +31,7 @@ const POSITION_HIERARCHY = {
     "Frontend Developer",
     "Backend Developer",
     "Full Stack Developer",
-    "Intern Developer"
+    "Intern Developer",
   ],
   Design: [
     "Design Director",
@@ -41,8 +42,8 @@ const POSITION_HIERARCHY = {
     "Junior Designer",
     "Graphic Designer",
     "Product Designer",
-    "Design Intern"
-  ]
+    "Design Intern",
+  ],
 };
 
 function Profile() {
@@ -218,11 +219,11 @@ function Profile() {
       formData.append("about", editFormData.about);
       formData.append("tag", editFormData.tag);
       formData.append("position", editFormData.position);
-      
+
       if (selectedProfilePhoto) {
         formData.append("profilePhoto", selectedProfilePhoto);
       }
-      
+
       if (selectedCoverPhoto) {
         formData.append("coverPhoto", selectedCoverPhoto);
       }
@@ -250,7 +251,7 @@ function Profile() {
       setSelectedCoverPhoto(null);
       setProfilePhotoPreview(null);
       setCoverPhotoPreview(null);
-      
+
       alert("Profile updated successfully!");
     } catch (err) {
       console.error("Error updating profile:", err);
@@ -276,12 +277,14 @@ function Profile() {
   };
 
   const getInitials = (name) => {
-    return name
-      ?.split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) || "U";
+    return (
+      name
+        ?.split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2) || "U"
+    );
   };
 
   // Get current user ID from token
@@ -325,10 +328,18 @@ function Profile() {
         )}
         {isEditing && (
           <div className="edit-actions">
-            <button className="btn-save-profile" onClick={handleSaveProfile} disabled={saving}>
+            <button
+              className="btn-save-profile"
+              onClick={handleSaveProfile}
+              disabled={saving}
+            >
               {saving ? "Saving..." : "💾 Save"}
             </button>
-            <button className="btn-cancel-edit" onClick={handleCancelEdit} disabled={saving}>
+            <button
+              className="btn-cancel-edit"
+              onClick={handleCancelEdit}
+              disabled={saving}
+            >
               ❌ Cancel
             </button>
           </div>
@@ -349,10 +360,10 @@ function Profile() {
           </label>
         )}
         {coverPhotoPreview || user.coverPhoto ? (
-          <img 
-            src={coverPhotoPreview || user.coverPhoto} 
-            alt="Cover" 
-            className="cover-photo" 
+          <img
+            src={coverPhotoPreview || user.coverPhoto}
+            alt="Cover"
+            className="cover-photo"
           />
         ) : (
           <div className="cover-photo-placeholder"></div>
@@ -391,7 +402,9 @@ function Profile() {
               <input
                 type="text"
                 value={editFormData.name}
-                onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, name: e.target.value })
+                }
                 className="profile-name-input"
                 placeholder="Enter your name"
               />
@@ -410,23 +423,25 @@ function Profile() {
             )}
           </div>
         </div>
-        
+
         {/* Department and Position Selection - Always visible for own profile */}
         {currentUserId === userId && (
           <div className="profile-role-selection">
             <div className="role-selection-group">
-              <label htmlFor="tag-select-profile" className="role-label">Department:</label>
+              <label htmlFor="tag-select-profile" className="role-label">
+                Department:
+              </label>
               <select
                 id="tag-select-profile"
                 value={editFormData.tag}
                 onChange={async (e) => {
                   const newTag = e.target.value;
-                  setEditFormData({ 
-                    ...editFormData, 
+                  setEditFormData({
+                    ...editFormData,
                     tag: newTag,
-                    position: "" // Reset position when department changes
+                    position: "", // Reset position when department changes
                   });
-                  
+
                   // Auto-save department change
                   try {
                     setSaving(true);
@@ -435,7 +450,7 @@ function Profile() {
                     formData.append("about", user.about || "");
                     formData.append("tag", newTag);
                     formData.append("position", "");
-                    
+
                     const response = await axios.put(
                       `http://localhost:5001/auth/profile/${userId}`,
                       formData,
@@ -446,7 +461,7 @@ function Profile() {
                         },
                       }
                     );
-                    
+
                     setProfileData((prev) => ({
                       ...prev,
                       user: response.data.user,
@@ -465,17 +480,19 @@ function Profile() {
                 <option value="Design">Design</option>
               </select>
             </div>
-            
+
             {editFormData.tag && (
               <div className="role-selection-group">
-                <label htmlFor="position-select" className="role-label">Position:</label>
+                <label htmlFor="position-select" className="role-label">
+                  Position:
+                </label>
                 <select
                   id="position-select"
                   value={editFormData.position}
                   onChange={async (e) => {
                     const newPosition = e.target.value;
                     setEditFormData({ ...editFormData, position: newPosition });
-                    
+
                     // Auto-save position change
                     try {
                       setSaving(true);
@@ -484,7 +501,7 @@ function Profile() {
                       formData.append("about", user.about || "");
                       formData.append("tag", editFormData.tag);
                       formData.append("position", newPosition);
-                      
+
                       const response = await axios.put(
                         `http://localhost:5001/auth/profile/${userId}`,
                         formData,
@@ -495,7 +512,7 @@ function Profile() {
                           },
                         }
                       );
-                      
+
                       setProfileData((prev) => ({
                         ...prev,
                         user: response.data.user,
@@ -510,7 +527,9 @@ function Profile() {
                 >
                   <option value="">Select Position</option>
                   {POSITION_HIERARCHY[editFormData.tag]?.map((pos) => (
-                    <option key={pos} value={pos}>{pos}</option>
+                    <option key={pos} value={pos}>
+                      {pos}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -521,24 +540,34 @@ function Profile() {
 
       {/* Tabs Section */}
       <div className="profile-tabs">
-        <div 
+        <div
           className={`tab ${activeTab === "posts" ? "active" : ""}`}
           onClick={() => setActiveTab("posts")}
         >
           Posts
         </div>
-        <div 
+        <div
           className={`tab ${activeTab === "about" ? "active" : ""}`}
           onClick={() => setActiveTab("about")}
         >
           About
         </div>
-        <div className="tab">Friends</div>
-        <div className="tab">Photos</div>
+        <div
+          className={`tab ${activeTab === "calendar" ? "active" : ""}`}
+          onClick={() => setActiveTab("calendar")}
+        >
+          Calendar
+        </div>
       </div>
 
       {/* Content Section */}
       <div className="profile-content">
+        {activeTab === "calendar" && (
+          <div className="calendar-section">
+            <Calendar userId={userId} isOwner={currentUserId === userId} />
+          </div>
+        )}
+
         {activeTab === "about" && (
           <div className="about-section">
             <div className="about-card">
@@ -546,7 +575,9 @@ function Profile() {
               {isEditing ? (
                 <textarea
                   value={editFormData.about}
-                  onChange={(e) => setEditFormData({ ...editFormData, about: e.target.value })}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, about: e.target.value })
+                  }
                   className="about-textarea"
                   placeholder="Tell people about yourself..."
                   rows="6"
@@ -585,163 +616,165 @@ function Profile() {
               </div>
             ) : (
               posts.map((post) => (
-              <div key={post._id} className="post-card">
-                <div className="post-header">
-                  <div className="post-avatar">
-                    {post.author?.profilePhoto ? (
-                      <img 
-                        src={post.author.profilePhoto} 
-                        alt={post.author.name}
-                        className="avatar-img"
-                      />
-                    ) : (
-                      getInitials(post.author?.name)
-                    )}
-                  </div>
-                  <div className="post-author-info">
-                    <div className="post-author-name">
-                      {post.author?.name || "Unknown User"}
-                      {post.author?.tag && (
-                        <span className="post-author-tag">{post.author.tag}</span>
-                      )}
-                      {post.author?.position && (
-                        <span className="post-author-position">• {post.author.position}</span>
-                      )}
-                    </div>
-                    <div className="post-date">
-                      {formatDate(post.createdAt)}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="post-content">
-                  {post.content}
-                  {post.tag && (
-                    <span className="post-tag-badge">#{post.tag}</span>
-                  )}
-                </div>
-
-                {post.image && (
-                  <img
-                    src={post.image}
-                    alt="Post content"
-                    className="post-image"
-                  />
-                )}
-
-                {post.video && (
-                  <video
-                    src={post.video}
-                    controls
-                    className="post-video"
-                  />
-                )}
-
-                <div className="post-stats">
-                  <span>👍 {post.likes?.length || 0} likes</span>
-                  <span>💬 {post.comments?.length || 0} comments</span>
-                </div>
-
-                <div className="post-actions">
-                  <button
-                    className={`post-action-btn ${
-                      post.likes?.includes(currentUserId) ? "liked" : ""
-                    }`}
-                    onClick={() => handleLike(post._id)}
-                  >
-                    👍 Like
-                  </button>
-                  <button className="post-action-btn">💬 Comment</button>
-                </div>
-
-                {/* Comments Section */}
-                <div className="comments-section">
-                  {post.comments && post.comments.length > 0 && (
-                    <>
-                      {(expandedComments[post._id]
-                        ? post.comments
-                        : post.comments.slice(0, 3)
-                      ).map((comment, index) => (
-                        <div key={index} className="comment">
-                          <div className="comment-avatar">
-                            {comment.author?.profilePhoto ? (
-                              <img 
-                                src={comment.author.profilePhoto} 
-                                alt={comment.author.name}
-                                className="avatar-img"
-                              />
-                            ) : (
-                              getInitials(comment.author?.name)
-                            )}
-                          </div>
-                          <div className="comment-content">
-                            <div className="comment-author">
-                              {comment.author?.name || "Unknown User"}
-                            </div>
-                            <div className="comment-text">
-                              {comment.content}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-
-                      {post.comments.length > 3 && (
-                        <button
-                          className="btn-show-comments"
-                          onClick={() => toggleCommentsExpansion(post._id)}
-                        >
-                          {expandedComments[post._id]
-                            ? `▲ Show less`
-                            : `▼ Show ${post.comments.length - 3} more comment${
-                                post.comments.length - 3 === 1 ? "" : "s"
-                              }`}
-                        </button>
-                      )}
-                    </>
-                  )}
-
-                  {/* Add Comment */}
-                  <div className="add-comment">
-                    <div className="comment-avatar">
-                      {currentUser?.profilePhoto ? (
-                        <img 
-                          src={currentUser.profilePhoto} 
-                          alt="You"
+                <div key={post._id} className="post-card">
+                  <div className="post-header">
+                    <div className="post-avatar">
+                      {post.author?.profilePhoto ? (
+                        <img
+                          src={post.author.profilePhoto}
+                          alt={post.author.name}
                           className="avatar-img"
                         />
                       ) : (
-                        getInitials(currentUser?.name || "You")
+                        getInitials(post.author?.name)
                       )}
                     </div>
-                    <input
-                      type="text"
-                      placeholder="Write a comment..."
-                      value={commentInputs[post._id] || ""}
-                      onChange={(e) =>
-                        setCommentInputs({
-                          ...commentInputs,
-                          [post._id]: e.target.value,
-                        })
-                      }
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter") {
-                          handleComment(post._id);
-                        }
-                      }}
-                    />
-                    {commentInputs[post._id] && (
-                      <button
-                        className="btn-comment"
-                        onClick={() => handleComment(post._id)}
-                      >
-                        Post
-                      </button>
+                    <div className="post-author-info">
+                      <div className="post-author-name">
+                        {post.author?.name || "Unknown User"}
+                        {post.author?.tag && (
+                          <span className="post-author-tag">
+                            {post.author.tag}
+                          </span>
+                        )}
+                        {post.author?.position && (
+                          <span className="post-author-position">
+                            • {post.author.position}
+                          </span>
+                        )}
+                      </div>
+                      <div className="post-date">
+                        {formatDate(post.createdAt)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="post-content">
+                    {post.content}
+                    {post.tag && (
+                      <span className="post-tag-badge">#{post.tag}</span>
                     )}
                   </div>
+
+                  {post.image && (
+                    <img
+                      src={post.image}
+                      alt="Post content"
+                      className="post-image"
+                    />
+                  )}
+
+                  {post.video && (
+                    <video src={post.video} controls className="post-video" />
+                  )}
+
+                  <div className="post-stats">
+                    <span>👍 {post.likes?.length || 0} likes</span>
+                    <span>💬 {post.comments?.length || 0} comments</span>
+                  </div>
+
+                  <div className="post-actions">
+                    <button
+                      className={`post-action-btn ${
+                        post.likes?.includes(currentUserId) ? "liked" : ""
+                      }`}
+                      onClick={() => handleLike(post._id)}
+                    >
+                      👍 Like
+                    </button>
+                    <button className="post-action-btn">💬 Comment</button>
+                  </div>
+
+                  {/* Comments Section */}
+                  <div className="comments-section">
+                    {post.comments && post.comments.length > 0 && (
+                      <>
+                        {(expandedComments[post._id]
+                          ? post.comments
+                          : post.comments.slice(0, 3)
+                        ).map((comment, index) => (
+                          <div key={index} className="comment">
+                            <div className="comment-avatar">
+                              {comment.author?.profilePhoto ? (
+                                <img
+                                  src={comment.author.profilePhoto}
+                                  alt={comment.author.name}
+                                  className="avatar-img"
+                                />
+                              ) : (
+                                getInitials(comment.author?.name)
+                              )}
+                            </div>
+                            <div className="comment-content">
+                              <div className="comment-author">
+                                {comment.author?.name || "Unknown User"}
+                              </div>
+                              <div className="comment-text">
+                                {comment.content}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
+                        {post.comments.length > 3 && (
+                          <button
+                            className="btn-show-comments"
+                            onClick={() => toggleCommentsExpansion(post._id)}
+                          >
+                            {expandedComments[post._id]
+                              ? `▲ Show less`
+                              : `▼ Show ${
+                                  post.comments.length - 3
+                                } more comment${
+                                  post.comments.length - 3 === 1 ? "" : "s"
+                                }`}
+                          </button>
+                        )}
+                      </>
+                    )}
+
+                    {/* Add Comment */}
+                    <div className="add-comment">
+                      <div className="comment-avatar">
+                        {currentUser?.profilePhoto ? (
+                          <img
+                            src={currentUser.profilePhoto}
+                            alt="You"
+                            className="avatar-img"
+                          />
+                        ) : (
+                          getInitials(currentUser?.name || "You")
+                        )}
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Write a comment..."
+                        value={commentInputs[post._id] || ""}
+                        onChange={(e) =>
+                          setCommentInputs({
+                            ...commentInputs,
+                            [post._id]: e.target.value,
+                          })
+                        }
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            handleComment(post._id);
+                          }
+                        }}
+                      />
+                      {commentInputs[post._id] && (
+                        <button
+                          className="btn-comment"
+                          onClick={() => handleComment(post._id)}
+                        >
+                          Post
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))
-          )}
+              ))
+            )}
           </div>
         )}
       </div>
