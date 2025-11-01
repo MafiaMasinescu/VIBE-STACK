@@ -12,6 +12,7 @@ import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 import calendarRoutes from "./routes/calendarRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
+import groupRoutes from "./routes/groupRoutes.js";
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ app.use("/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/calendar", calendarRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/groups", groupRoutes);
 
 connectDB().then(() => {
   app.listen(PORT, () => {

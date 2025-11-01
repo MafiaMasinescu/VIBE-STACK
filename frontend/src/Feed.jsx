@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import "./Feed.css";
 import UserList from "./Components/UserList";
+import GroupList from "./Components/GroupList";
 
 // Position hierarchy for each department
 const POSITION_HIERARCHY = {
@@ -339,6 +340,9 @@ function Feed() {
       </div>
 
       <div className="feed-main-layout">
+        {/* Group List Sidebar */}
+        <GroupList currentUser={currentUser} />
+
         <div className="feed-content-wrapper">
         {error && <div className="error">{error}</div>}
 
