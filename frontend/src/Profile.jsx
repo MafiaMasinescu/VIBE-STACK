@@ -20,6 +20,7 @@ function Profile() {
   const [coverPhotoPreview, setCoverPhotoPreview] = useState(null);
   const [activeTab, setActiveTab] = useState("posts");
   const [saving, setSaving] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const { userId } = useParams();
   const navigate = useNavigate();
 
@@ -31,6 +32,7 @@ function Profile() {
       navigate("/login");
       return;
     }
+    fetchCurrentUser();
     fetchUserProfile();
   }, [userId, token, navigate]);
 
@@ -42,6 +44,19 @@ function Profile() {
       });
     }
   }, [profileData]);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await axios.get("http://localhost:5001/auth/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setCurrentUser(response.data);
+    } catch (err) {
+      console.error("Error fetching current user:", err);
+    }
+  };
 
   const fetchUserProfile = async () => {
     try {
@@ -389,7 +404,15 @@ function Profile() {
               <div key={post._id} className="post-card">
                 <div className="post-header">
                   <div className="post-avatar">
-                    {getInitials(post.author?.name)}
+                    {post.author?.profilePhoto ? (
+                      <img 
+                        src={`http://localhost:5001${post.author.profilePhoto}`} 
+                        alt={post.author.name}
+                        className="avatar-img"
+                      />
+                    ) : (
+                      getInitials(post.author?.name)
+                    )}
                   </div>
                   <div className="post-author-info">
                     <div className="post-author-name">
@@ -446,7 +469,15 @@ function Profile() {
                       ).map((comment, index) => (
                         <div key={index} className="comment">
                           <div className="comment-avatar">
-                            {getInitials(comment.author?.name)}
+                            {comment.author?.profilePhoto ? (
+                              <img 
+                                src={`http://localhost:5001${comment.author.profilePhoto}`} 
+                                alt={comment.author.name}
+                                className="avatar-img"
+                              />
+                            ) : (
+                              getInitials(comment.author?.name)
+                            )}
                           </div>
                           <div className="comment-content">
                             <div className="comment-author">
@@ -476,7 +507,17 @@ function Profile() {
 
                   {/* Add Comment */}
                   <div className="add-comment">
-                    <div className="comment-avatar">{getInitials("You")}</div>
+                    <div className="comment-avatar">
+                      {currentUser?.profilePhoto ? (
+                        <img 
+                          src={`http://localhost:5001${currentUser.profilePhoto}`} 
+                          alt="You"
+                          className="avatar-img"
+                        />
+                      ) : (
+                        getInitials(currentUser?.name || "You")
+                      )}
+                    </div>
                     <input
                       type="text"
                       placeholder="Write a comment..."
