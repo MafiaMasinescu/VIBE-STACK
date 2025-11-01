@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import "./Feed.css";
+import UserList from "./Components/UserList";
 
 // Position hierarchy for each department
 const POSITION_HIERARCHY = {
@@ -337,7 +338,8 @@ function Feed() {
         </div>
       </div>
 
-      <div className="feed-content-wrapper">
+      <div className="feed-main-layout">
+        <div className="feed-content-wrapper">
         {error && <div className="error">{error}</div>}
 
         {/* Tag Filter */}
@@ -616,6 +618,10 @@ function Feed() {
           ))
         )}
       </div>
+      </div>
+
+      {/* User List Sidebar */}
+      <UserList currentUser={currentUser} />
       </div>
     </div>
   );

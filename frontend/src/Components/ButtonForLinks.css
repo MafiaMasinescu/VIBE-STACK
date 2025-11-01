@@ -1,52 +1,76 @@
 .button {
   /* Visuals */
   --btn-bg: linear-gradient(
-    180deg,
-    #5eead4 0%,
-    #34d399 100%
+    135deg,
+    #10b981 0%,
+    #34d399 50%,
+    #5eead4 100%
   ); /* mint/teal gradient */
-  --btn-fg: #053e3b; /* dark text */
-  --btn-hover-bg: linear-gradient(180deg, #6eeed9 0%, #2fbf86 100%);
-  --btn-padding-y: 3rem;
-  --btn-padding-x: 6rem;
-  --btn-radius: 6px; /* slightly rounded rectangle */
-  --btn-shadow: 0 6px 14px rgba(16, 185, 129, 0.14);
+  --btn-fg: #ffffff; /* white text for better contrast */
+  --btn-hover-bg: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+  --btn-padding-y: 1.2rem;
+  --btn-padding-x: 3rem;
+  --btn-radius: 16px; /* more rounded for modern look */
+  --btn-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
 
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   padding: var(--btn-padding-y) var(--btn-padding-x);
   background: var(--btn-bg);
   color: var(--btn-fg);
-  font-weight: 600;
-  font-size: 2rem;
-  border: none;
+  font-weight: 700;
+  font-size: 1.2rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: var(--btn-radius);
-  box-shadow: var(--btn-shadow);
+  box-shadow: var(--btn-shadow),
+              0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   cursor: pointer;
-  transition: transform 180ms cubic-bezier(0.2, 0.9, 0.2, 1),
-    box-shadow 180ms ease, opacity 120ms ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Shimmer effect overlay */
+.button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s ease;
+}
+
+.button:hover::before {
+  left: 100%;
 }
 
 .button:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px) scale(1.02);
   background: var(--btn-hover-bg);
-  box-shadow: 0 10px 22px rgba(16, 185, 129, 0.16);
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.45),
+              0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+              0 0 20px rgba(52, 211, 153, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 /* Keyboard focus target for accessibility */
 .button:focus-visible {
-  outline: 3px solid rgba(59, 130, 246, 0.22); /* blue focus ring */
-  outline-offset: 3px;
+  outline: 3px solid rgba(52, 211, 153, 0.6); /* teal focus ring */
+  outline-offset: 4px;
 }
 
 .button:active {
-  transform: translateY(0);
-  box-shadow: 0 6px 10px rgba(16, 185, 129, 0.12);
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
 }
 
 .button[disabled],
@@ -79,4 +103,40 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: fadeInUp 0.8s ease-out 0.4s backwards;
+  z-index: 1;
+  position: relative;
+}
+
+/* Animation for fade in effect */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Add a subtle pulse animation to draw attention */
+@keyframes subtlePulse {
+  0%, 100% {
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+                0 0 20px rgba(52, 211, 153, 0.4);
+  }
+}
+
+.button {
+  animation: subtlePulse 3s ease-in-out infinite;
+}
+
+.button:hover {
+  animation: none; /* Stop pulse on hover */
 }

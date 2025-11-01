@@ -11,6 +11,7 @@ import rateLimiter from "./middleware/rateLimiter.js";
 import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 import calendarRoutes from "./routes/calendarRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.use("/api/notes", notesRoutes);
 app.use("/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/calendar", calendarRoutes);
+app.use("/api/messages", messageRoutes);
 
 connectDB().then(() => {
   app.listen(PORT, () => {
