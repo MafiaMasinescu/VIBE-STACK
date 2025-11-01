@@ -8,6 +8,15 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: "visitor"
     },
+    tag: {
+        type: String,
+        enum: ['HR', 'Developer', 'Design', null],
+        default: null
+    },
+    position: {
+        type: String,
+        default: null
+    },
     profilePhoto: {
         type: String,
         default: null

@@ -3,6 +3,48 @@ import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import "./Feed.css";
 
+// Position hierarchy for each department
+const POSITION_HIERARCHY = {
+  HR: [
+    "HR Director",
+    "HR Manager",
+    "HR Lead",
+    "HR Co-Lead",
+    "Senior HR Specialist",
+    "HR Specialist",
+    "HR Coordinator",
+    "HR Assistant",
+    "Recruiter",
+    "Talent Acquisition Specialist"
+  ],
+  Developer: [
+    "CTO",
+    "Engineering Director",
+    "Engineering Manager",
+    "Tech Lead",
+    "Senior Software Engineer",
+    "Software Engineer",
+    "Junior Software Engineer",
+    "DevOps Engineer",
+    "QA Engineer",
+    "Frontend Developer",
+    "Backend Developer",
+    "Full Stack Developer",
+    "Intern Developer"
+  ],
+  Design: [
+    "Design Director",
+    "Design Manager",
+    "Lead Designer",
+    "Senior UX/UI Designer",
+    "UX/UI Designer",
+    "Junior Designer",
+    "Graphic Designer",
+    "Product Designer",
+    "Design Intern"
+  ]
+};
+
 function Feed() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,6 +55,9 @@ function Feed() {
   const [commentInputs, setCommentInputs] = useState({});
   const [expandedComments, setExpandedComments] = useState({});
   const [currentUser, setCurrentUser] = useState(null);
+  const [selectedTag, setSelectedTag] = useState("");
+  const [postTag, setPostTag] = useState("");
+  const [tagFilter, setTagFilter] = useState("All");
   const navigate = useNavigate();
 
   // Get token from localStorage
@@ -25,7 +70,7 @@ function Feed() {
     }
     fetchCurrentUser();
     fetchPosts();
-  }, [token, navigate]);
+  }, [token, navigate, tagFilter]);
 
   const fetchCurrentUser = async () => {
     try {
@@ -43,7 +88,11 @@ function Feed() {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:5001/api/posts", {
+      const url = tagFilter && tagFilter !== "All" 
+        ? `http://localhost:5001/api/posts?tag=${tagFilter}`
+        : "http://localhost:5001/api/posts";
+      
+      const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -70,6 +119,7 @@ function Feed() {
     try {
       const formData = new FormData();
       formData.append("content", newPostContent);
+      formData.append("tag", postTag);
       
       if (selectedFile) {
         formData.append("media", selectedFile);
@@ -87,6 +137,7 @@ function Feed() {
       );
       setPosts([response.data, ...posts]);
       setNewPostContent("");
+      setPostTag("");
       setSelectedFile(null);
       setPreviewUrl(null);
       setError("");
@@ -270,7 +321,7 @@ function Feed() {
             <div className="profile-avatar-btn">
               {currentUser?.profilePhoto ? (
                 <img 
-                  src={`http://localhost:5001${currentUser.profilePhoto}`} 
+                  src={currentUser.profilePhoto} 
                   alt={currentUser.name}
                   className="profile-avatar-img"
                 />
@@ -288,6 +339,22 @@ function Feed() {
 
       <div className="feed-content-wrapper">
         {error && <div className="error">{error}</div>}
+
+        {/* Tag Filter */}
+        <div className="tag-filter-card">
+          <label htmlFor="tag-filter" className="filter-label">Filter by Tag:</label>
+          <select
+            id="tag-filter"
+            value={tagFilter}
+            onChange={(e) => setTagFilter(e.target.value)}
+            className="tag-filter-select"
+          >
+            <option value="All">All Posts</option>
+            <option value="HR">HR</option>
+            <option value="Developer">Developer</option>
+            <option value="Design">Design</option>
+          </select>
+        </div>
 
         {/* Create Post */}
         <div className="create-post-card">
@@ -326,6 +393,18 @@ function Feed() {
               />
               📷 Photo/Video
             </label>
+            
+            <select
+              value={postTag}
+              onChange={(e) => setPostTag(e.target.value)}
+              className="post-tag-select"
+            >
+              <option value="">No Tag</option>
+              <option value="HR">HR</option>
+              <option value="Developer">Developer</option>
+              <option value="Design">Design</option>
+            </select>
+            
             <button
               type="submit"
               className="btn-post"
@@ -354,7 +433,7 @@ function Feed() {
                     <div className="post-avatar">
                       {post.author?.profilePhoto ? (
                         <img 
-                          src={`http://localhost:5001${post.author.profilePhoto}`} 
+                          src={post.author.profilePhoto} 
                           alt={post.author.name}
                           className="avatar-img"
                         />
@@ -372,6 +451,12 @@ function Feed() {
                   {post.author?._id ? (
                     <Link to={`/profile/${post.author._id}`} className="post-author-name">
                       {post.author?.name || "Unknown User"}
+                      {post.author?.tag && (
+                        <span className="post-author-tag">{post.author.tag}</span>
+                      )}
+                      {post.author?.position && (
+                        <span className="post-author-position">• {post.author.position}</span>
+                      )}
                     </Link>
                   ) : (
                     <div className="post-author-name">
@@ -390,11 +475,16 @@ function Feed() {
                 )}
               </div>
 
-              <div className="post-content">{post.content}</div>
+              <div className="post-content">
+                {post.content}
+                {post.tag && (
+                  <span className="post-tag-badge">#{post.tag}</span>
+                )}
+              </div>
 
               {post.image && (
                 <img
-                  src={`http://localhost:5001${post.image}`}
+                  src={post.image}
                   alt="Post content"
                   className="post-image"
                 />
@@ -402,7 +492,7 @@ function Feed() {
 
               {post.video && (
                 <video
-                  src={`http://localhost:5001${post.video}`}
+                  src={post.video}
                   controls
                   className="post-video"
                 />
@@ -440,7 +530,7 @@ function Feed() {
                               <div className="comment-avatar">
                                 {comment.author?.profilePhoto ? (
                                   <img 
-                                    src={`http://localhost:5001${comment.author.profilePhoto}`} 
+                                    src={comment.author.profilePhoto} 
                                     alt={comment.author.name}
                                     className="avatar-img"
                                   />
@@ -488,7 +578,7 @@ function Feed() {
                   <div className="comment-avatar">
                     {currentUser?.profilePhoto ? (
                       <img 
-                        src={`http://localhost:5001${currentUser.profilePhoto}`} 
+                        src={currentUser.profilePhoto} 
                         alt="You"
                         className="avatar-img"
                       />

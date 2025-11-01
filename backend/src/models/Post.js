@@ -10,6 +10,11 @@ const postSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    tag: {
+        type: String,
+        enum: ['HR', 'Developer', 'Design', null],
+        default: null
+    },
     image: {
         type: String,
         default: null

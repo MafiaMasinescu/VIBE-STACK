@@ -1,57 +1,48 @@
 import multer from "multer";
-import path from "path";
-import { fileURLToPath } from "url";
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import dotenv from "dotenv";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+dotenv.config();
 
-// Configure storage
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        // Store in backend/uploads folder
-        cb(null, path.join(__dirname, "../../uploads"));
-    },
-    filename: function (req, file, cb) {
-        // Create unique filename: timestamp-randomstring-originalname
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        cb(null, uniqueSuffix + "-" + file.originalname);
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Configure Cloudinary storage for multer
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: async (req, file) => {
+        // Determine if it's a video or image
+        const isVideo = file.mimetype.startsWith("video/");
+        
+        return {
+            folder: "vibe-stack",
+            resource_type: isVideo ? "video" : "image",
+            allowed_formats: ["jpg", "jpeg", "png", "gif", "webp", "mp4", "mov", "avi", "mkv", "webm"],
+            transformation: isVideo ? [] : [
+                {
+                    width: 1920,
+                    height: 1920,
+                    crop: "limit",
+                    quality: "auto:good",
+                }
+            ],
+        };
     },
 });
 
-// File filter to accept only images and videos
-const fileFilter = (req, file, cb) => {
-    const allowedImageTypes = /jpeg|jpg|png|gif|webp/;
-    const allowedVideoTypes = /mp4|mov|avi|mkv|webm/;
-    
-    const extname = path.extname(file.originalname).toLowerCase();
-    const mimetype = file.mimetype;
-
-    // Check if it's an image
-    if (
-        allowedImageTypes.test(extname.slice(1)) &&
-        mimetype.startsWith("image/")
-    ) {
-        return cb(null, true);
-    }
-    
-    // Check if it's a video
-    if (
-        allowedVideoTypes.test(extname.slice(1)) &&
-        mimetype.startsWith("video/")
-    ) {
-        return cb(null, true);
-    }
-
-    cb(new Error("Only image and video files are allowed!"));
-};
-
-// Configure multer
+// Configure multer with Cloudinary storage
 const upload = multer({
     storage: storage,
-    fileFilter: fileFilter,
     limits: {
         fileSize: 100 * 1024 * 1024, // 100MB max file size
     },
 });
 
 export default upload;
+
+

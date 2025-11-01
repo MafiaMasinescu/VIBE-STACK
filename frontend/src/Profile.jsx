@@ -3,6 +3,48 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import "./Profile.css";
 
+// Position hierarchy for each department
+const POSITION_HIERARCHY = {
+  HR: [
+    "HR Director",
+    "HR Manager",
+    "HR Lead",
+    "HR Co-Lead",
+    "Senior HR Specialist",
+    "HR Specialist",
+    "HR Coordinator",
+    "HR Assistant",
+    "Recruiter",
+    "Talent Acquisition Specialist"
+  ],
+  Developer: [
+    "CTO",
+    "Engineering Director",
+    "Engineering Manager",
+    "Tech Lead",
+    "Senior Software Engineer",
+    "Software Engineer",
+    "Junior Software Engineer",
+    "DevOps Engineer",
+    "QA Engineer",
+    "Frontend Developer",
+    "Backend Developer",
+    "Full Stack Developer",
+    "Intern Developer"
+  ],
+  Design: [
+    "Design Director",
+    "Design Manager",
+    "Lead Designer",
+    "Senior UX/UI Designer",
+    "UX/UI Designer",
+    "Junior Designer",
+    "Graphic Designer",
+    "Product Designer",
+    "Design Intern"
+  ]
+};
+
 function Profile() {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,6 +55,8 @@ function Profile() {
   const [editFormData, setEditFormData] = useState({
     name: "",
     about: "",
+    tag: "",
+    position: "",
   });
   const [selectedProfilePhoto, setSelectedProfilePhoto] = useState(null);
   const [selectedCoverPhoto, setSelectedCoverPhoto] = useState(null);
@@ -41,6 +85,8 @@ function Profile() {
       setEditFormData({
         name: profileData.user.name || "",
         about: profileData.user.about || "",
+        tag: profileData.user.tag || "",
+        position: profileData.user.position || "",
       });
     }
   }, [profileData]);
@@ -155,6 +201,8 @@ function Profile() {
     setEditFormData({
       name: profileData.user.name || "",
       about: profileData.user.about || "",
+      tag: profileData.user.tag || "",
+      position: profileData.user.position || "",
     });
     setSelectedProfilePhoto(null);
     setSelectedCoverPhoto(null);
@@ -168,6 +216,8 @@ function Profile() {
       const formData = new FormData();
       formData.append("name", editFormData.name);
       formData.append("about", editFormData.about);
+      formData.append("tag", editFormData.tag);
+      formData.append("position", editFormData.position);
       
       if (selectedProfilePhoto) {
         formData.append("profilePhoto", selectedProfilePhoto);
@@ -300,7 +350,7 @@ function Profile() {
         )}
         {coverPhotoPreview || user.coverPhoto ? (
           <img 
-            src={coverPhotoPreview || `http://localhost:5001${user.coverPhoto}`} 
+            src={coverPhotoPreview || user.coverPhoto} 
             alt="Cover" 
             className="cover-photo" 
           />
@@ -311,44 +361,162 @@ function Profile() {
 
       {/* Profile Info Section */}
       <div className="profile-info-section">
-        <div className="profile-photo-container">
-          {isEditing && (
-            <label className="photo-upload-label profile-upload">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleProfilePhotoChange}
-                style={{ display: "none" }}
+        <div className="profile-left-section">
+          <div className="profile-photo-container">
+            {isEditing && (
+              <label className="photo-upload-label profile-upload">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfilePhotoChange}
+                  style={{ display: "none" }}
+                />
+                📷
+              </label>
+            )}
+            {profilePhotoPreview || user.profilePhoto ? (
+              <img
+                src={profilePhotoPreview || user.profilePhoto}
+                alt={user.name}
+                className="profile-photo"
               />
-              📷
-            </label>
-          )}
-          {profilePhotoPreview || user.profilePhoto ? (
-            <img
-              src={profilePhotoPreview || `http://localhost:5001${user.profilePhoto}`}
-              alt={user.name}
-              className="profile-photo"
-            />
-          ) : (
-            <div className="profile-photo-placeholder">
-              {getInitials(user.name)}
+            ) : (
+              <div className="profile-photo-placeholder">
+                {getInitials(user.name)}
+              </div>
+            )}
+          </div>
+          <div className="profile-details">
+            {isEditing ? (
+              <input
+                type="text"
+                value={editFormData.name}
+                onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                className="profile-name-input"
+                placeholder="Enter your name"
+              />
+            ) : (
+              <h1 className="profile-name">{user.name}</h1>
+            )}
+            <p className="profile-friends">{posts.length} posts</p>
+            {user.tag && user.position && (
+              <div className="profile-role-info">
+                <span className="profile-tag">{user.tag}</span>
+                <span className="profile-position">{user.position}</span>
+              </div>
+            )}
+            {user.tag && !user.position && (
+              <span className="profile-tag">{user.tag}</span>
+            )}
+          </div>
+        </div>
+        
+        {/* Department and Position Selection - Always visible for own profile */}
+        {currentUserId === userId && (
+          <div className="profile-role-selection">
+            <div className="role-selection-group">
+              <label htmlFor="tag-select-profile" className="role-label">Department:</label>
+              <select
+                id="tag-select-profile"
+                value={editFormData.tag}
+                onChange={async (e) => {
+                  const newTag = e.target.value;
+                  setEditFormData({ 
+                    ...editFormData, 
+                    tag: newTag,
+                    position: "" // Reset position when department changes
+                  });
+                  
+                  // Auto-save department change
+                  try {
+                    setSaving(true);
+                    const formData = new FormData();
+                    formData.append("name", user.name);
+                    formData.append("about", user.about || "");
+                    formData.append("tag", newTag);
+                    formData.append("position", "");
+                    
+                    const response = await axios.put(
+                      `http://localhost:5001/auth/profile/${userId}`,
+                      formData,
+                      {
+                        headers: {
+                          Authorization: `Bearer ${token}`,
+                          "Content-Type": "multipart/form-data",
+                        },
+                      }
+                    );
+                    
+                    setProfileData((prev) => ({
+                      ...prev,
+                      user: response.data.user,
+                    }));
+                  } catch (err) {
+                    console.error("Error updating department:", err);
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                className="role-select"
+              >
+                <option value="">No Department</option>
+                <option value="HR">HR</option>
+                <option value="Developer">Developer</option>
+                <option value="Design">Design</option>
+              </select>
             </div>
-          )}
-        </div>
-        <div className="profile-details">
-          {isEditing ? (
-            <input
-              type="text"
-              value={editFormData.name}
-              onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-              className="profile-name-input"
-              placeholder="Enter your name"
-            />
-          ) : (
-            <h1 className="profile-name">{user.name}</h1>
-          )}
-          <p className="profile-friends">{posts.length} posts</p>
-        </div>
+            
+            {editFormData.tag && (
+              <div className="role-selection-group">
+                <label htmlFor="position-select" className="role-label">Position:</label>
+                <select
+                  id="position-select"
+                  value={editFormData.position}
+                  onChange={async (e) => {
+                    const newPosition = e.target.value;
+                    setEditFormData({ ...editFormData, position: newPosition });
+                    
+                    // Auto-save position change
+                    try {
+                      setSaving(true);
+                      const formData = new FormData();
+                      formData.append("name", user.name);
+                      formData.append("about", user.about || "");
+                      formData.append("tag", editFormData.tag);
+                      formData.append("position", newPosition);
+                      
+                      const response = await axios.put(
+                        `http://localhost:5001/auth/profile/${userId}`,
+                        formData,
+                        {
+                          headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "multipart/form-data",
+                          },
+                        }
+                      );
+                      
+                      setProfileData((prev) => ({
+                        ...prev,
+                        user: response.data.user,
+                      }));
+                    } catch (err) {
+                      console.error("Error updating position:", err);
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                  className="role-select"
+                >
+                  <option value="">Select Position</option>
+                  {POSITION_HIERARCHY[editFormData.tag]?.map((pos) => (
+                    <option key={pos} value={pos}>{pos}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Tabs Section */}
@@ -384,9 +552,25 @@ function Profile() {
                   rows="6"
                 />
               ) : (
-                <div className="about-content">
-                  {user.about || "No information added yet."}
-                </div>
+                <>
+                  <div className="about-content">
+                    {user.about || "No information added yet."}
+                  </div>
+                  {(user.tag || user.position) && (
+                    <div className="about-role-section">
+                      {user.tag && (
+                        <div className="about-tag">
+                          <strong>Department:</strong> {user.tag}
+                        </div>
+                      )}
+                      {user.position && (
+                        <div className="about-tag">
+                          <strong>Position:</strong> {user.position}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -406,7 +590,7 @@ function Profile() {
                   <div className="post-avatar">
                     {post.author?.profilePhoto ? (
                       <img 
-                        src={`http://localhost:5001${post.author.profilePhoto}`} 
+                        src={post.author.profilePhoto} 
                         alt={post.author.name}
                         className="avatar-img"
                       />
@@ -417,6 +601,12 @@ function Profile() {
                   <div className="post-author-info">
                     <div className="post-author-name">
                       {post.author?.name || "Unknown User"}
+                      {post.author?.tag && (
+                        <span className="post-author-tag">{post.author.tag}</span>
+                      )}
+                      {post.author?.position && (
+                        <span className="post-author-position">• {post.author.position}</span>
+                      )}
                     </div>
                     <div className="post-date">
                       {formatDate(post.createdAt)}
@@ -424,11 +614,16 @@ function Profile() {
                   </div>
                 </div>
 
-                <div className="post-content">{post.content}</div>
+                <div className="post-content">
+                  {post.content}
+                  {post.tag && (
+                    <span className="post-tag-badge">#{post.tag}</span>
+                  )}
+                </div>
 
                 {post.image && (
                   <img
-                    src={`http://localhost:5001${post.image}`}
+                    src={post.image}
                     alt="Post content"
                     className="post-image"
                   />
@@ -436,7 +631,7 @@ function Profile() {
 
                 {post.video && (
                   <video
-                    src={`http://localhost:5001${post.video}`}
+                    src={post.video}
                     controls
                     className="post-video"
                   />
@@ -471,7 +666,7 @@ function Profile() {
                           <div className="comment-avatar">
                             {comment.author?.profilePhoto ? (
                               <img 
-                                src={`http://localhost:5001${comment.author.profilePhoto}`} 
+                                src={comment.author.profilePhoto} 
                                 alt={comment.author.name}
                                 className="avatar-img"
                               />
@@ -510,7 +705,7 @@ function Profile() {
                     <div className="comment-avatar">
                       {currentUser?.profilePhoto ? (
                         <img 
-                          src={`http://localhost:5001${currentUser.profilePhoto}`} 
+                          src={currentUser.profilePhoto} 
                           alt="You"
                           className="avatar-img"
                         />

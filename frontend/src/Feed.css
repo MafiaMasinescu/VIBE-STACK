@@ -542,3 +542,110 @@ body {
   object-fit: cover;
   border-radius: 50%;
 }
+
+/* Tag Filter Card */
+.tag-filter-card {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
+  border: 2px solid rgba(52, 211, 153, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+}
+
+.tag-filter-card:hover {
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.2);
+  transform: translateY(-2px);
+}
+
+.filter-label {
+  color: #075242;
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.tag-filter-select {
+  padding: 8px 16px;
+  border: 2px solid rgba(52, 211, 153, 0.5);
+  border-radius: 8px;
+  background: white;
+  color: #1f2937;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+  min-width: 150px;
+}
+
+.tag-filter-select:hover {
+  border-color: #10b981;
+}
+
+.tag-filter-select:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Post Tag Select */
+.post-tag-select {
+  padding: 8px 16px;
+  border: 2px solid rgba(52, 211, 153, 0.5);
+  border-radius: 8px;
+  background: white;
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.post-tag-select:hover {
+  border-color: #10b981;
+}
+
+.post-tag-select:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Tag Badges */
+.post-author-tag {
+  display: inline-block;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  color: white;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.post-author-position {
+  display: inline-block;
+  color: #065f46;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.post-tag-badge {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.15);
+  color: #075242;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-left: 10px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}

@@ -85,8 +85,8 @@ export const getUserProfile = async (req, res) => {
         
         // Get user's posts
         const posts = await Post.find({ author: userId })
-            .populate("author", "name email profilePhoto")
-            .populate("comments.author", "name email profilePhoto")
+            .populate("author", "name email profilePhoto tag position")
+            .populate("comments.author", "name email profilePhoto tag position")
             .sort({ createdAt: -1 });
         
         res.status(200).json({
@@ -102,7 +102,7 @@ export const getUserProfile = async (req, res) => {
 export const updateUserProfile = async (req, res) => {
     try {
         const { userId } = req.params;
-        const { name, about } = req.body;
+        const { name, about, tag, position } = req.body;
         
         // Verify the user is updating their own profile
         if (req.userId !== userId) {
@@ -112,15 +112,17 @@ export const updateUserProfile = async (req, res) => {
         const updateData = {};
         if (name) updateData.name = name;
         if (about !== undefined) updateData.about = about;
+        if (tag !== undefined) updateData.tag = tag || null;
+        if (position !== undefined) updateData.position = position || null;
         
-        // Handle profile photo upload
+        // Handle profile photo upload (Cloudinary URL)
         if (req.files?.profilePhoto) {
-            updateData.profilePhoto = `/uploads/${req.files.profilePhoto[0].filename}`;
+            updateData.profilePhoto = req.files.profilePhoto[0].path; // Cloudinary URL
         }
         
-        // Handle cover photo upload
+        // Handle cover photo upload (Cloudinary URL)
         if (req.files?.coverPhoto) {
-            updateData.coverPhoto = `/uploads/${req.files.coverPhoto[0].filename}`;
+            updateData.coverPhoto = req.files.coverPhoto[0].path; // Cloudinary URL
         }
         
         const updatedUser = await User.findByIdAndUpdate(

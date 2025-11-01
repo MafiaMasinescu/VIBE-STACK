@@ -22,9 +22,16 @@ export const verifyToken = (req, res, next) => {
 // Get all posts (feed)
 export const getPosts = async (req, res) => {
     try {
-        const posts = await Post.find()
-            .populate("author", "name email profilePhoto")
-            .populate("comments.author", "name email profilePhoto")
+        const { tag } = req.query; // Get tag filter from query params
+        
+        const filter = {};
+        if (tag && tag !== 'All') {
+            filter.tag = tag;
+        }
+        
+        const posts = await Post.find(filter)
+            .populate("author", "name email profilePhoto tag position")
+            .populate("comments.author", "name email profilePhoto tag position")
             .sort({ createdAt: -1 }); // newest first
         
         res.status(200).json(posts);
@@ -37,7 +44,7 @@ export const getPosts = async (req, res) => {
 // Create a new post
 export const createPost = async (req, res) => {
     try {
-        const { content } = req.body;
+        const { content, tag } = req.body;
         
         if (!content) {
             return res.status(400).json({ message: "Content is required" });
@@ -48,8 +55,8 @@ export const createPost = async (req, res) => {
 
         // Check if file was uploaded
         if (req.file) {
-            // Construct the URL for the uploaded file
-            mediaUrl = `/uploads/${req.file.filename}`;
+            // Cloudinary automatically uploads and returns the URL
+            mediaUrl = req.file.path; // This is the Cloudinary URL
             
             // Determine media type based on mimetype
             if (req.file.mimetype.startsWith("image/")) {
@@ -62,6 +69,7 @@ export const createPost = async (req, res) => {
         const newPost = new Post({
             author: req.userId,
             content,
+            tag: tag || null,
             image: mediaType === "image" ? mediaUrl : null,
             video: mediaType === "video" ? mediaUrl : null,
             mediaType: mediaType
@@ -70,7 +78,7 @@ export const createPost = async (req, res) => {
         await newPost.save();
         
         // Populate author info before sending response
-        await newPost.populate("author", "name email profilePhoto");
+        await newPost.populate("author", "name email profilePhoto tag position");
         
         res.status(201).json(newPost);
     } catch (error) {
@@ -102,8 +110,8 @@ export const toggleLike = async (req, res) => {
         await post.save();
         
         // Populate author and comments author before sending response
-        await post.populate("author", "name email profilePhoto");
-        await post.populate("comments.author", "name email profilePhoto");
+        await post.populate("author", "name email profilePhoto tag position");
+        await post.populate("comments.author", "name email profilePhoto tag position");
         
         res.status(200).json(post);
     } catch (error) {
@@ -136,8 +144,8 @@ export const addComment = async (req, res) => {
         await post.save();
         
         // Populate both author and comments author before sending response
-        await post.populate("author", "name email profilePhoto");
-        await post.populate("comments.author", "name email profilePhoto");
+        await post.populate("author", "name email profilePhoto tag position");
+        await post.populate("comments.author", "name email profilePhoto tag position");
         
         res.status(201).json(post);
     } catch (error) {
