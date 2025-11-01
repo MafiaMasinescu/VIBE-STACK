@@ -4,7 +4,7 @@ import "./AboutPage.css";
 import backGroundImage from "./assets/AboutPageWallpaper.jpg";
 
 export default function AboutPage() {
-  const CompanyName = "SocialVibe";
+  const CompanyName = "VibeMedia";
   const backGroundImageStyle = {
     backgroundImage: `url(${backGroundImage})`,
     height: "100vh",
