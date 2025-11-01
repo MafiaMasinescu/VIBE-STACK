@@ -12,6 +12,7 @@ function Feed() {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [commentInputs, setCommentInputs] = useState({});
   const [expandedComments, setExpandedComments] = useState({});
+  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
   // Get token from localStorage
@@ -22,8 +23,22 @@ function Feed() {
       navigate("/login");
       return;
     }
+    fetchCurrentUser();
     fetchPosts();
   }, [token, navigate]);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await axios.get("http://localhost:5001/auth/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setCurrentUser(response.data);
+    } catch (err) {
+      console.error("Error fetching current user:", err);
+    }
+  };
 
   const fetchPosts = async () => {
     try {
@@ -253,7 +268,15 @@ function Feed() {
         <div className="header-actions">
           <button className="btn-profile" onClick={goToMyProfile}>
             <div className="profile-avatar-btn">
-              {currentUserName ? getInitials(currentUserName) : "U"}
+              {currentUser?.profilePhoto ? (
+                <img 
+                  src={`http://localhost:5001${currentUser.profilePhoto}`} 
+                  alt={currentUser.name}
+                  className="profile-avatar-img"
+                />
+              ) : (
+                getInitials(currentUser?.name || "U")
+              )}
             </div>
             <span>Profile</span>
           </button>
@@ -263,10 +286,11 @@ function Feed() {
         </div>
       </div>
 
-      {error && <div className="error">{error}</div>}
+      <div className="feed-content-wrapper">
+        {error && <div className="error">{error}</div>}
 
-      {/* Create Post */}
-      <div className="create-post-card">
+        {/* Create Post */}
+        <div className="create-post-card">
         <form className="create-post-form" onSubmit={handleCreatePost}>
           <textarea
             placeholder="What's on your mind?"
@@ -328,7 +352,15 @@ function Feed() {
                 {post.author?._id ? (
                   <Link to={`/profile/${post.author._id}`} className="post-avatar-link">
                     <div className="post-avatar">
-                      {getInitials(post.author?.name)}
+                      {post.author?.profilePhoto ? (
+                        <img 
+                          src={`http://localhost:5001${post.author.profilePhoto}`} 
+                          alt={post.author.name}
+                          className="avatar-img"
+                        />
+                      ) : (
+                        getInitials(post.author?.name)
+                      )}
                     </div>
                   </Link>
                 ) : (
@@ -406,7 +438,15 @@ function Feed() {
                           {comment.author?._id ? (
                             <Link to={`/profile/${comment.author._id}`} className="comment-avatar-link">
                               <div className="comment-avatar">
-                                {getInitials(comment.author?.name)}
+                                {comment.author?.profilePhoto ? (
+                                  <img 
+                                    src={`http://localhost:5001${comment.author.profilePhoto}`} 
+                                    alt={comment.author.name}
+                                    className="avatar-img"
+                                  />
+                                ) : (
+                                  getInitials(comment.author?.name)
+                                )}
                               </div>
                             </Link>
                           ) : (
@@ -445,7 +485,17 @@ function Feed() {
 
                 {/* Add Comment */}
                 <div className="add-comment">
-                  <div className="comment-avatar">{getInitials("You")}</div>
+                  <div className="comment-avatar">
+                    {currentUser?.profilePhoto ? (
+                      <img 
+                        src={`http://localhost:5001${currentUser.profilePhoto}`} 
+                        alt="You"
+                        className="avatar-img"
+                      />
+                    ) : (
+                      getInitials(currentUser?.name || "You")
+                    )}
+                  </div>
                   <input
                     type="text"
                     placeholder="Write a comment..."
@@ -475,6 +525,7 @@ function Feed() {
             </div>
           ))
         )}
+      </div>
       </div>
     </div>
   );

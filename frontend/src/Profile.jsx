@@ -9,6 +9,17 @@ function Profile() {
   const [error, setError] = useState("");
   const [commentInputs, setCommentInputs] = useState({});
   const [expandedComments, setExpandedComments] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    about: "",
+  });
+  const [selectedProfilePhoto, setSelectedProfilePhoto] = useState(null);
+  const [selectedCoverPhoto, setSelectedCoverPhoto] = useState(null);
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState(null);
+  const [coverPhotoPreview, setCoverPhotoPreview] = useState(null);
+  const [activeTab, setActiveTab] = useState("posts");
+  const [saving, setSaving] = useState(false);
   const { userId } = useParams();
   const navigate = useNavigate();
 
@@ -22,6 +33,15 @@ function Profile() {
     }
     fetchUserProfile();
   }, [userId, token, navigate]);
+
+  useEffect(() => {
+    if (profileData?.user) {
+      setEditFormData({
+        name: profileData.user.name || "",
+        about: profileData.user.about || "",
+      });
+    }
+  }, [profileData]);
 
   const fetchUserProfile = async () => {
     try {
@@ -95,6 +115,86 @@ function Profile() {
     });
   };
 
+  const handleProfilePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedProfilePhoto(file);
+      setProfilePhotoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleCoverPhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedCoverPhoto(file);
+      setCoverPhotoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditFormData({
+      name: profileData.user.name || "",
+      about: profileData.user.about || "",
+    });
+    setSelectedProfilePhoto(null);
+    setSelectedCoverPhoto(null);
+    setProfilePhotoPreview(null);
+    setCoverPhotoPreview(null);
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setSaving(true);
+      const formData = new FormData();
+      formData.append("name", editFormData.name);
+      formData.append("about", editFormData.about);
+      
+      if (selectedProfilePhoto) {
+        formData.append("profilePhoto", selectedProfilePhoto);
+      }
+      
+      if (selectedCoverPhoto) {
+        formData.append("coverPhoto", selectedCoverPhoto);
+      }
+
+      const response = await axios.put(
+        `http://localhost:5001/auth/profile/${userId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      // Update profile data with new info
+      setProfileData((prev) => ({
+        ...prev,
+        user: response.data.user,
+      }));
+
+      // Reset edit state
+      setIsEditing(false);
+      setSelectedProfilePhoto(null);
+      setSelectedCoverPhoto(null);
+      setProfilePhotoPreview(null);
+      setCoverPhotoPreview(null);
+      
+      alert("Profile updated successfully!");
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      alert(err.response?.data?.message || "Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -153,12 +253,42 @@ function Profile() {
         <button className="btn-back" onClick={() => navigate("/feed")}>
           ← Back to Feed
         </button>
+        {currentUserId === userId && !isEditing && (
+          <button className="btn-edit-profile" onClick={handleEditClick}>
+            ✏️ Edit Profile
+          </button>
+        )}
+        {isEditing && (
+          <div className="edit-actions">
+            <button className="btn-save-profile" onClick={handleSaveProfile} disabled={saving}>
+              {saving ? "Saving..." : "💾 Save"}
+            </button>
+            <button className="btn-cancel-edit" onClick={handleCancelEdit} disabled={saving}>
+              ❌ Cancel
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Cover Photo */}
       <div className="cover-photo-container">
-        {user.coverPhoto ? (
-          <img src={user.coverPhoto} alt="Cover" className="cover-photo" />
+        {isEditing && (
+          <label className="photo-upload-label cover-upload">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleCoverPhotoChange}
+              style={{ display: "none" }}
+            />
+            📷 Change Cover Photo
+          </label>
+        )}
+        {coverPhotoPreview || user.coverPhoto ? (
+          <img 
+            src={coverPhotoPreview || `http://localhost:5001${user.coverPhoto}`} 
+            alt="Cover" 
+            className="cover-photo" 
+          />
         ) : (
           <div className="cover-photo-placeholder"></div>
         )}
@@ -167,9 +297,20 @@ function Profile() {
       {/* Profile Info Section */}
       <div className="profile-info-section">
         <div className="profile-photo-container">
-          {user.profilePhoto ? (
+          {isEditing && (
+            <label className="photo-upload-label profile-upload">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleProfilePhotoChange}
+                style={{ display: "none" }}
+              />
+              📷
+            </label>
+          )}
+          {profilePhotoPreview || user.profilePhoto ? (
             <img
-              src={user.profilePhoto}
+              src={profilePhotoPreview || `http://localhost:5001${user.profilePhoto}`}
               alt={user.name}
               className="profile-photo"
             />
@@ -180,29 +321,71 @@ function Profile() {
           )}
         </div>
         <div className="profile-details">
-          <h1 className="profile-name">{user.name}</h1>
+          {isEditing ? (
+            <input
+              type="text"
+              value={editFormData.name}
+              onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+              className="profile-name-input"
+              placeholder="Enter your name"
+            />
+          ) : (
+            <h1 className="profile-name">{user.name}</h1>
+          )}
           <p className="profile-friends">{posts.length} posts</p>
         </div>
       </div>
 
       {/* Tabs Section */}
       <div className="profile-tabs">
-        <div className="tab active">Posts</div>
-        <div className="tab">About</div>
+        <div 
+          className={`tab ${activeTab === "posts" ? "active" : ""}`}
+          onClick={() => setActiveTab("posts")}
+        >
+          Posts
+        </div>
+        <div 
+          className={`tab ${activeTab === "about" ? "active" : ""}`}
+          onClick={() => setActiveTab("about")}
+        >
+          About
+        </div>
         <div className="tab">Friends</div>
         <div className="tab">Photos</div>
       </div>
 
-      {/* Posts Section */}
+      {/* Content Section */}
       <div className="profile-content">
-        <div className="profile-posts">
-          <h2 className="posts-heading">Posts</h2>
-          {posts.length === 0 ? (
-            <div className="post-card" style={{ textAlign: "center" }}>
-              <p style={{ color: "#65676b" }}>No posts yet.</p>
+        {activeTab === "about" && (
+          <div className="about-section">
+            <div className="about-card">
+              <h2 className="about-heading">About</h2>
+              {isEditing ? (
+                <textarea
+                  value={editFormData.about}
+                  onChange={(e) => setEditFormData({ ...editFormData, about: e.target.value })}
+                  className="about-textarea"
+                  placeholder="Tell people about yourself..."
+                  rows="6"
+                />
+              ) : (
+                <div className="about-content">
+                  {user.about || "No information added yet."}
+                </div>
+              )}
             </div>
-          ) : (
-            posts.map((post) => (
+          </div>
+        )}
+
+        {activeTab === "posts" && (
+          <div className="profile-posts">
+            <h2 className="posts-heading">Posts</h2>
+            {posts.length === 0 ? (
+              <div className="post-card" style={{ textAlign: "center" }}>
+                <p style={{ color: "#65676b" }}>No posts yet.</p>
+              </div>
+            ) : (
+              posts.map((post) => (
               <div key={post._id} className="post-card">
                 <div className="post-header">
                   <div className="post-avatar">
@@ -323,7 +506,8 @@ function Profile() {
               </div>
             ))
           )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

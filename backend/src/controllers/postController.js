@@ -23,8 +23,8 @@ export const verifyToken = (req, res, next) => {
 export const getPosts = async (req, res) => {
     try {
         const posts = await Post.find()
-            .populate("author", "name email")
-            .populate("comments.author", "name email")
+            .populate("author", "name email profilePhoto")
+            .populate("comments.author", "name email profilePhoto")
             .sort({ createdAt: -1 }); // newest first
         
         res.status(200).json(posts);
@@ -70,7 +70,7 @@ export const createPost = async (req, res) => {
         await newPost.save();
         
         // Populate author info before sending response
-        await newPost.populate("author", "name email");
+        await newPost.populate("author", "name email profilePhoto");
         
         res.status(201).json(newPost);
     } catch (error) {
@@ -102,8 +102,8 @@ export const toggleLike = async (req, res) => {
         await post.save();
         
         // Populate author and comments author before sending response
-        await post.populate("author", "name email");
-        await post.populate("comments.author", "name email");
+        await post.populate("author", "name email profilePhoto");
+        await post.populate("comments.author", "name email profilePhoto");
         
         res.status(200).json(post);
     } catch (error) {
@@ -136,8 +136,8 @@ export const addComment = async (req, res) => {
         await post.save();
         
         // Populate both author and comments author before sending response
-        await post.populate("author", "name email");
-        await post.populate("comments.author", "name email");
+        await post.populate("author", "name email profilePhoto");
+        await post.populate("comments.author", "name email profilePhoto");
         
         res.status(201).json(post);
     } catch (error) {

@@ -15,6 +15,10 @@ const UserSchema = new mongoose.Schema({
     coverPhoto: {
         type: String,
         default: null
+    },
+    about: {
+        type: String,
+        default: ""
     }
 }, { timestamps: true })
 
