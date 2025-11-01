@@ -8,6 +8,8 @@ function Feed() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [newPostContent, setNewPostContent] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [commentInputs, setCommentInputs] = useState({});
   const [expandedComments, setExpandedComments] = useState({});
   const navigate = useNavigate();
@@ -51,22 +53,67 @@ function Feed() {
     if (!newPostContent.trim()) return;
 
     try {
+      const formData = new FormData();
+      formData.append("content", newPostContent);
+      
+      if (selectedFile) {
+        formData.append("media", selectedFile);
+      }
+
       const response = await axios.post(
         "http://localhost:5001/api/posts",
-        { content: newPostContent },
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
       setPosts([response.data, ...posts]);
       setNewPostContent("");
+      setSelectedFile(null);
+      setPreviewUrl(null);
       setError("");
     } catch (err) {
       console.error("Error creating post:", err);
       setError("Failed to create post");
     }
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      const validImageTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+      const validVideoTypes = ["video/mp4", "video/mov", "video/avi", "video/mkv", "video/webm"];
+      
+      if (![...validImageTypes, ...validVideoTypes].includes(file.type)) {
+        setError("Please select a valid image or video file");
+        return;
+      }
+
+      // Validate file size (100MB max)
+      if (file.size > 100 * 1024 * 1024) {
+        setError("File size must be less than 100MB");
+        return;
+      }
+
+      setSelectedFile(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setError("");
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setPreviewUrl(null);
   };
 
   const handleLike = async (postId) => {
@@ -176,6 +223,25 @@ function Feed() {
 
   const currentUserId = getCurrentUserId();
 
+  // Get current user name from token
+  const getCurrentUserName = () => {
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.name;
+    } catch {
+      return null;
+    }
+  };
+
+  const currentUserName = getCurrentUserName();
+
+  const goToMyProfile = () => {
+    if (currentUserId) {
+      navigate(`/profile/${currentUserId}`);
+    }
+  };
+
   if (loading) {
     return <div className="loading">Loading feed...</div>;
   }
@@ -183,10 +249,18 @@ function Feed() {
   return (
     <div className="feed-container">
       <div className="feed-header">
-        <h1>📱 Social Feed</h1>
-        <button className="btn-logout" onClick={handleLogout}>
-          Logout
-        </button>
+        <h1>🌟 Connect & Share</h1>
+        <div className="header-actions">
+          <button className="btn-profile" onClick={goToMyProfile}>
+            <div className="profile-avatar-btn">
+              {currentUserName ? getInitials(currentUserName) : "U"}
+            </div>
+            <span>Profile</span>
+          </button>
+          <button className="btn-logout" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
       </div>
 
       {error && <div className="error">{error}</div>}
@@ -199,7 +273,35 @@ function Feed() {
             value={newPostContent}
             onChange={(e) => setNewPostContent(e.target.value)}
           />
+          
+          {/* Preview selected media */}
+          {previewUrl && (
+            <div className="media-preview">
+              {selectedFile?.type.startsWith("image/") ? (
+                <img src={previewUrl} alt="Preview" className="preview-image" />
+              ) : (
+                <video src={previewUrl} controls className="preview-video" />
+              )}
+              <button
+                type="button"
+                className="btn-remove-media"
+                onClick={handleRemoveFile}
+              >
+                ✕ Remove
+              </button>
+            </div>
+          )}
+          
           <div className="create-post-actions">
+            <label className="btn-add-media">
+              <input
+                type="file"
+                accept="image/*,video/*"
+                onChange={handleFileSelect}
+                style={{ display: "none" }}
+              />
+              📷 Photo/Video
+            </label>
             <button
               type="submit"
               className="btn-post"
@@ -260,9 +362,17 @@ function Feed() {
 
               {post.image && (
                 <img
-                  src={post.image}
+                  src={`http://localhost:5001${post.image}`}
                   alt="Post content"
                   className="post-image"
+                />
+              )}
+
+              {post.video && (
+                <video
+                  src={`http://localhost:5001${post.video}`}
+                  controls
+                  className="post-video"
                 />
               )}
 

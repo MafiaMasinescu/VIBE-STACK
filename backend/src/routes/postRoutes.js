@@ -1,4 +1,5 @@
 import express from "express";
+import upload from "../config/multer.js";
 import { 
     getPosts, 
     createPost, 
@@ -16,8 +17,8 @@ router.use(verifyToken);
 // GET /api/posts - Get all posts
 router.get("/", getPosts);
 
-// POST /api/posts - Create a new post
-router.post("/", createPost);
+// POST /api/posts - Create a new post (with optional file upload)
+router.post("/", upload.single("media"), createPost);
 
 // POST /api/posts/:postId/like - Toggle like on a post
 router.post("/:postId/like", toggleLike);

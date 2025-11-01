@@ -222,9 +222,17 @@ function Profile() {
 
                 {post.image && (
                   <img
-                    src={post.image}
+                    src={`http://localhost:5001${post.image}`}
                     alt="Post content"
                     className="post-image"
+                  />
+                )}
+
+                {post.video && (
+                  <video
+                    src={`http://localhost:5001${post.video}`}
+                    controls
+                    className="post-video"
                   />
                 )}
 

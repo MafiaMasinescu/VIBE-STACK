@@ -37,16 +37,34 @@ export const getPosts = async (req, res) => {
 // Create a new post
 export const createPost = async (req, res) => {
     try {
-        const { content, image } = req.body;
+        const { content } = req.body;
         
         if (!content) {
             return res.status(400).json({ message: "Content is required" });
         }
 
+        let mediaType = "none";
+        let mediaUrl = null;
+
+        // Check if file was uploaded
+        if (req.file) {
+            // Construct the URL for the uploaded file
+            mediaUrl = `/uploads/${req.file.filename}`;
+            
+            // Determine media type based on mimetype
+            if (req.file.mimetype.startsWith("image/")) {
+                mediaType = "image";
+            } else if (req.file.mimetype.startsWith("video/")) {
+                mediaType = "video";
+            }
+        }
+
         const newPost = new Post({
             author: req.userId,
             content,
-            image: image || null
+            image: mediaType === "image" ? mediaUrl : null,
+            video: mediaType === "video" ? mediaUrl : null,
+            mediaType: mediaType
         });
 
         await newPost.save();
