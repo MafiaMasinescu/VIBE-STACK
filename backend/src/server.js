@@ -26,7 +26,9 @@ const PORT = process.env.PORT;
 // Allow cross-origin requests from Vite dev server and allow credentials (cookies)
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"], // frontend URL
+    origin: process.env.NODE_ENV === 'production' 
+      ? [process.env.FRONTEND_URL] 
+      : ["http://localhost:5173", "http://localhost:5174"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   })
@@ -50,3 +52,6 @@ connectDB().then(() => {
     console.log("Server started on port:", PORT);
   });
 });
+
+// Export for Vercel
+export default app;
