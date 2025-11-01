@@ -1,3 +1,76 @@
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
 /* Global styling inspired by AboutPage */
 html,
 body,
@@ -7,7 +80,7 @@ body,
 }
 
 body {
-  background-image: url('./assets/AboutPageWallpaper.jpg');
+  background-image: url("./assets/AboutPageWallpaper.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -19,6 +92,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  animation: fadeIn 0.5s ease-out;
 }
 
 .feed-header {
@@ -37,17 +111,26 @@ body {
   right: 0;
   z-index: 1000;
   box-sizing: border-box;
+  animation: slideInLeft 0.6s ease-out;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.feed-header:hover {
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.25);
 }
 
 .feed-header h1 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
+  animation: fadeInUp 0.8s ease-out;
 }
 
 .header-actions {
   display: flex;
   gap: 12px;
+  animation: slideInRight 0.8s ease-out;
   align-items: center;
 }
 
@@ -63,13 +146,39 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-profile::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.btn-profile:hover::before {
+  left: 100%;
 }
 
 .btn-profile:hover {
   background: rgba(52, 211, 153, 1);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+.btn-profile:active {
+  transform: translateY(0);
 }
 
 .profile-avatar-btn {
@@ -84,6 +193,11 @@ body {
   font-weight: 600;
   font-size: 14px;
   overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.profile-avatar-btn:hover {
+  transform: scale(1.1);
 }
 
 .profile-avatar-img {
@@ -102,13 +216,39 @@ body {
   font-weight: 600;
   cursor: pointer;
   font-size: 15px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-logout::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.btn-logout:hover::before {
+  left: 100%;
 }
 
 .btn-logout:hover {
   background-color: rgba(220, 38, 38, 1);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+}
+
+.btn-logout:active {
+  transform: translateY(0);
 }
 
 .feed-content-wrapper {
@@ -116,10 +256,13 @@ body {
   margin: 0 auto;
   padding: 80px 20px 20px 20px;
   width: 100%;
+  animation: fadeInUp 0.6s ease-out;
 }
 
 .create-post-card {
   background: rgba(255, 255, 255, 0.95);
+  animation: scaleIn 0.5s ease-out;
+  backdrop-filter: blur(10px);
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
@@ -257,12 +400,27 @@ body {
   padding: 16px;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
   border: 2px solid rgba(52, 211, 153, 0.2);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeInUp 0.5s ease-out backwards;
+  backdrop-filter: blur(10px);
+}
+
+.post-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.post-card:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.post-card:nth-child(4) {
+  animation-delay: 0.3s;
 }
 
 .post-card:hover {
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.2);
-  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+  transform: translateY(-4px);
+  border-color: rgba(52, 211, 153, 0.4);
 }
 
 .post-header {
@@ -276,6 +434,7 @@ body {
   height: 40px;
   border-radius: 50%;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  transition: transform 0.3s ease;
   color: white;
   display: flex;
   align-items: center;
@@ -372,7 +531,27 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.post-action-btn::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(52, 211, 153, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.post-action-btn:hover::before {
+  width: 300px;
+  height: 300px;
 }
 
 .post-action-btn:hover {
@@ -380,19 +559,26 @@ body {
   transform: scale(1.05);
 }
 
+.post-action-btn:active {
+  transform: scale(0.95);
+}
+
 .post-action-btn.liked {
   color: #10b981;
   font-weight: 700;
+  animation: pulse 0.3s ease-in-out;
 }
 
 .comments-section {
   margin-top: 12px;
+  animation: fadeInUp 0.4s ease-out;
 }
 
 .comment {
   display: flex;
   gap: 8px;
   margin-bottom: 8px;
+  animation: slideInLeft 0.3s ease-out;
 }
 
 .comment-avatar {

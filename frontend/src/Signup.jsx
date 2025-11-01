@@ -1,7 +1,8 @@
 import { useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import "./Signup.css";
+import backGroundImage from "./assets/AboutPageWallpaper.jpg";
 
 function Signup() {
   const [name, setName] = useState("");
@@ -10,6 +11,14 @@ function Signup() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const backGroundImageStyle = {
+    backgroundImage: `url(${backGroundImage})`,
+    backgroundSize: "cover",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "center",
+    backgroundAttachment: "fixed",
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -33,61 +42,72 @@ function Signup() {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center bg-secondary vh-100">
-      <div className="bg-white p-3 rounded w-25">
-        <h2>Register</h2>
-        <form onSubmit={handleSubmit}>
-          {error && <div className="alert alert-danger">{error}</div>}
-          {loading && <div className="alert alert-info">Registering...</div>}
-          <div className="mb-3">
-            <label htmlFor="name">
-              <strong>Name</strong>
+    <div className="signup-container" style={backGroundImageStyle}>
+      <div className="signup-card">
+        <h2 className="signup-title">
+          <span className="title-word">Create</span>
+          <span className="title-word">Account</span>
+        </h2>
+        <form onSubmit={handleSubmit} className="signup-form">
+          {error && <div className="alert-message alert-error">{error}</div>}
+          {loading && (
+            <div className="alert-message alert-info">
+              Creating your account...
+            </div>
+          )}
+          <div className="form-group">
+            <label htmlFor="name" className="form-label">
+              Full Name
             </label>
             <input
               type="text"
-              placeholder="Enter Name"
-              autoComplete="off"
+              id="name"
+              placeholder="Enter your full name"
+              autoComplete="name"
               name="name"
               value={name}
-              className="form-control rounded-0"
+              className="form-input"
               onChange={(e) => setName(e.target.value)}
+              required
             />
           </div>
-          <div className="mb-3">
-            <label htmlFor="email">
-              <strong>Email</strong>
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">
+              Email Address
             </label>
             <input
               type="email"
-              placeholder="Enter Email"
-              autoComplete="off"
+              id="email"
+              placeholder="Enter your email"
+              autoComplete="email"
               name="email"
-              className="form-control rounded-0"
+              className="form-input"
               onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
-          <div className="mb-3">
-            <label htmlFor="email">
-              <strong>Password</strong>
+          <div className="form-group">
+            <label htmlFor="password" className="form-label">
+              Password
             </label>
             <input
               type="password"
-              placeholder="Enter Password"
+              id="password"
+              placeholder="Create a password"
+              autoComplete="new-password"
               name="password"
-              className="form-control rounded-0"
+              className="form-input"
               onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
-          <button type="submit" className="btn btn-success w-100 rounded-0">
-            Register
+          <button type="submit" className="btn-submit" disabled={loading}>
+            {loading ? "Creating Account..." : "Sign Up"}
           </button>
         </form>
-        <p>Already Have an Account</p>
-        <Link
-          to="/login"
-          className="btn btn-default border w-100 bg-light rounded-0 text-decoration-none"
-        >
-          Login
+        <p className="divider-text">Already have an account?</p>
+        <Link to="/login" className="btn-login">
+          Sign In
         </Link>
       </div>
     </div>

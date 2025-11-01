@@ -2,6 +2,8 @@ import React from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import "./Login.css";
+import backGroundImage from "./assets/AboutPageWallpaper.jpg";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -11,6 +13,14 @@ function Login() {
 
   // We need credentials because the backend may set cookies on login
   axios.defaults.withCredentials = true;
+
+  const backGroundImageStyle = {
+    backgroundImage: `url(${backGroundImage})`,
+    backgroundSize: "cover",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "center",
+    backgroundAttachment: "fixed",
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -43,46 +53,51 @@ function Login() {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center bg-secondary vh-100">
-      <div className="bg-white p-3 rounded w-25">
-        <h2>Login</h2>
-        {error && <div className="alert alert-danger">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label htmlFor="email">
-              <strong>Email</strong>
+    <div className="login-container" style={backGroundImageStyle}>
+      <div className="login-card">
+        <h2 className="login-title">
+          <span className="title-word">Welcome</span>
+          <span className="title-word">Back</span>
+        </h2>
+        {error && <div className="error-message">{error}</div>}
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">
+              Email Address
             </label>
             <input
               type="email"
-              placeholder="Enter Email"
-              autoComplete="off"
+              id="email"
+              placeholder="Enter your email"
+              autoComplete="email"
               name="email"
-              className="form-control rounded-0"
+              className="form-input"
               onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
-          <div className="mb-3">
-            <label htmlFor="email">
-              <strong>Password</strong>
+          <div className="form-group">
+            <label htmlFor="password" className="form-label">
+              Password
             </label>
             <input
               type="password"
-              placeholder="Enter Password"
+              id="password"
+              placeholder="Enter your password"
+              autoComplete="current-password"
               name="password"
-              className="form-control rounded-0"
+              className="form-input"
               onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
-          <button type="submit" className="btn btn-success w-100 rounded-0">
-            Login
+          <button type="submit" className="btn-submit">
+            Sign In
           </button>
         </form>
-        <p>Already Have an Account</p>
-        <Link
-          to="/register"
-          className="btn btn-default border w-100 bg-light rounded-0 text-decoration-none"
-        >
-          Sign Up
+        <p className="divider-text">Don't have an account?</p>
+        <Link to="/register" className="btn-signup">
+          Create Account
         </Link>
       </div>
     </div>
