@@ -12,7 +12,7 @@ import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 import calendarRoutes from "./routes/calendarRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
-import groupRoutes from "./routes/groupRoutes.js";
+import invitationRoutes from "./routes/invitationRoutes.js";
 
 dotenv.config();
 
@@ -26,9 +26,7 @@ const PORT = process.env.PORT;
 // Allow cross-origin requests from Vite dev server and allow credentials (cookies)
 app.use(
   cors({
-    origin: process.env.NODE_ENV === 'production' 
-      ? [process.env.FRONTEND_URL] 
-      : ["http://localhost:5173", "http://localhost:5174"],
+    origin: ["http://localhost:5173", "http://localhost:5174"], // frontend URL
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   })
@@ -45,13 +43,10 @@ app.use("/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/calendar", calendarRoutes);
 app.use("/api/messages", messageRoutes);
-app.use("/api/groups", groupRoutes);
+app.use("/api/invitations", invitationRoutes);
 
 connectDB().then(() => {
   app.listen(PORT, () => {
     console.log("Server started on port:", PORT);
   });
 });
-
-// Export for Vercel
-export default app;

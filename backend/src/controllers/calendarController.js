@@ -1,4 +1,5 @@
 import CalendarEventModel from "../models/CalendarEvent.js";
+import User from "../models/User.js";
 
 // Get calendar data for a specific user (public view)
 export const getUserCalendarEvents = async (req, res) => {
@@ -119,11 +120,26 @@ export const addEvent = async (req, res) => {
         .json({ message: "Date, event name, and time are required" });
     }
 
+    // Get user details to set as creator
+    const user = await User.findById(userId);
+
     const event = await CalendarEventModel.findOneAndUpdate(
       { userId, date },
       {
         $push: {
-          events: { name, description: description || "", time },
+          events: {
+            name,
+            description: description || "",
+            time,
+            attendees: [
+              {
+                userId: userId,
+                name: user.name,
+                status: "accepted",
+              },
+            ],
+            createdBy: userId,
+          },
         },
       },
       {

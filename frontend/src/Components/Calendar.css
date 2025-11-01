@@ -764,3 +764,107 @@
     font-size: 0.6em;
   }
 }
+
+/* Event invitation styles */
+.event-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.event-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(5px);
+}
+
+.event-content {
+  flex: 1;
+}
+
+.event-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.invite-btn {
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85em;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.invite-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.attendee-count {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 4px 10px;
+  background: rgba(102, 126, 234, 0.2);
+  border-radius: 12px;
+  font-size: 0.85em;
+  color: #667eea;
+  font-weight: 500;
+}
+
+.attendees-list {
+  margin-top: 8px;
+  padding: 8px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 6px;
+  font-size: 0.9em;
+}
+
+.attendee-name {
+  color: #667eea;
+  font-weight: 500;
+}
+
+/* Invite modal styles */
+.invite-event-info {
+  padding: 15px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.invite-event-info p {
+  margin: 5px 0;
+  color: #e0e0e0;
+}
+
+.coworker-select {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #e0e0e0;
+  font-size: 1em;
+  transition: all 0.3s ease;
+}
+
+.coworker-select:focus {
+  outline: none;
+  border-color: #667eea;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.coworker-select option {
+  background: #1a1a2e;
+  color: #e0e0e0;
+}

@@ -37,6 +37,26 @@ const CalendarEventSchema = new mongoose.Schema(
           type: String, // Format: "HH:MM" (24-hour)
           required: true,
         },
+        attendees: [
+          {
+            userId: {
+              type: String,
+              ref: "User",
+            },
+            name: {
+              type: String,
+            },
+            status: {
+              type: String,
+              enum: ["pending", "accepted", "declined"],
+              default: "accepted",
+            },
+          },
+        ],
+        createdBy: {
+          type: String,
+          ref: "User",
+        },
       },
     ],
   },

@@ -27,7 +27,7 @@ function Login() {
     setError("");
     // server mounts auth routes under /auth
     axios
-      .post("http://localhost:5001/auth/login", { email, password })
+      .post(`${API_URL}/auth/login`, { email, password })
       .then((res) => {
         // adapt to new controller responses (token or error)
         if (res.data && res.data.token) {

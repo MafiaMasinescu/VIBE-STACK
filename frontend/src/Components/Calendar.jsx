@@ -37,6 +37,12 @@ const Calendar = ({ userId, isOwner = false }) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  
+  // Invitation states
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [selectedEventForInvite, setSelectedEventForInvite] = useState(null);
+  const [coworkers, setCoworkers] = useState([]);
+  const [selectedCoworker, setSelectedCoworker] = useState("");
 
   // Get token from localStorage
   const token = localStorage.getItem("token");
@@ -293,6 +299,71 @@ const Calendar = ({ userId, isOwner = false }) => {
     } catch (err) {
       console.error("Error deleting event:", err);
       setError("Failed to delete event");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Fetch coworkers for invitation
+  const fetchCoworkers = async () => {
+    try {
+      const response = await axios.get("http://localhost:5001/auth/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setCoworkers(response.data);
+    } catch (err) {
+      console.error("Error fetching coworkers:", err);
+    }
+  };
+
+  // Open invite modal
+  const openInviteModal = (eventData, eventIndex) => {
+    setSelectedEventForInvite({
+      ...eventData,
+      eventId: eventIndex,
+      date: getDayKey(selectedDay, selectedMonth, selectedYear),
+    });
+    fetchCoworkers();
+    setShowInviteModal(true);
+  };
+
+  // Send invitation
+  const sendInvitation = async () => {
+    if (!selectedCoworker) {
+      setError("Please select a coworker to invite");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await axios.post(
+        "http://localhost:5001/api/invitations/send",
+        {
+          recipientId: selectedCoworker,
+          eventDate: selectedEventForInvite.date,
+          eventName: selectedEventForInvite.name,
+          eventDescription: selectedEventForInvite.description || "",
+          eventTime: selectedEventForInvite.time,
+          eventId: selectedEventForInvite.eventId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setSuccessMessage("Invitation sent successfully!");
+      setShowInviteModal(false);
+      setSelectedCoworker("");
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      console.error("Error sending invitation:", err);
+      setError(err.response?.data?.error || "Failed to send invitation");
     } finally {
       setSaving(false);
     }
@@ -674,21 +745,47 @@ const Calendar = ({ userId, isOwner = false }) => {
                                 @ {formatTimeForDisplay(event.time)}
                               </span>
                             )}
+                            {event.attendees && event.attendees.length > 0 && (
+                              <span className="attendee-count">
+                                👥 {event.attendees.length} {event.attendees.length === 1 ? 'person' : 'people'} attending
+                              </span>
+                            )}
                           </div>
                           {event.description && (
                             <div className="event-description">
                               {event.description}
                             </div>
                           )}
+                          {event.attendees && event.attendees.length > 0 && (
+                            <div className="attendees-list">
+                              <strong>Attending:</strong>{" "}
+                              {event.attendees.map((attendee, i) => (
+                                <span key={i} className="attendee-name">
+                                  {attendee.name}
+                                  {i < event.attendees.length - 1 ? ", " : ""}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                        {isOwner && (
-                          <button
-                            className="delete-btn"
-                            onClick={() => handleDeleteEvent(index)}
-                          >
-                            Delete
-                          </button>
-                        )}
+                        <div className="event-actions">
+                          {isOwner && (
+                            <>
+                              <button
+                                className="invite-btn"
+                                onClick={() => openInviteModal(event, index)}
+                              >
+                                Invite
+                              </button>
+                              <button
+                                className="delete-btn"
+                                onClick={() => handleDeleteEvent(index)}
+                              >
+                                Delete
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -701,6 +798,62 @@ const Calendar = ({ userId, isOwner = false }) => {
                     </p>
                   )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Invite Modal */}
+      {showInviteModal && (
+        <div className="modal-overlay" onClick={() => setShowInviteModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Invite Coworker to Event</h2>
+            {selectedEventForInvite && (
+              <div className="invite-event-info">
+                <p><strong>Event:</strong> {selectedEventForInvite.name}</p>
+                <p><strong>Time:</strong> {formatTimeForDisplay(selectedEventForInvite.time)}</p>
+                {selectedEventForInvite.description && (
+                  <p><strong>Description:</strong> {selectedEventForInvite.description}</p>
+                )}
+              </div>
+            )}
+            
+            <div className="form-group">
+              <label>Select Coworker:</label>
+              <select
+                value={selectedCoworker}
+                onChange={(e) => setSelectedCoworker(e.target.value)}
+                className="coworker-select"
+              >
+                <option value="">-- Select a coworker --</option>
+                {coworkers.map((coworker) => (
+                  <option key={coworker._id} value={coworker._id}>
+                    {coworker.name} {coworker.tag && `(${coworker.tag})`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {error && <div className="error-message">{error}</div>}
+
+            <div className="modal-actions">
+              <button
+                onClick={sendInvitation}
+                disabled={saving || !selectedCoworker}
+                className="save-btn"
+              >
+                {saving ? "Sending..." : "Send Invitation"}
+              </button>
+              <button
+                onClick={() => {
+                  setShowInviteModal(false);
+                  setSelectedCoworker("");
+                  setError("");
+                }}
+                className="cancel-btn"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
