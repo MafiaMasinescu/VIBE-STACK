@@ -1,0 +1,317 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import "./Feed.css";
+
+function Feed() {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [newPostContent, setNewPostContent] = useState("");
+  const [commentInputs, setCommentInputs] = useState({});
+  const navigate = useNavigate();
+
+  // Get token from localStorage
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    fetchPosts();
+  }, [token, navigate]);
+
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("http://localhost:5001/api/posts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setPosts(response.data);
+      setError("");
+    } catch (err) {
+      console.error("Error fetching posts:", err);
+      if (err.response?.status === 401) {
+        localStorage.removeItem("token");
+        navigate("/login");
+      } else {
+        setError("Failed to load posts");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreatePost = async (e) => {
+    e.preventDefault();
+    if (!newPostContent.trim()) return;
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5001/api/posts",
+        { content: newPostContent },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setPosts([response.data, ...posts]);
+      setNewPostContent("");
+      setError("");
+    } catch (err) {
+      console.error("Error creating post:", err);
+      setError("Failed to create post");
+    }
+  };
+
+  const handleLike = async (postId) => {
+    try {
+      const response = await axios.post(
+        `http://localhost:5001/api/posts/${postId}/like`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setPosts(
+        posts.map((post) => (post._id === postId ? response.data : post))
+      );
+    } catch (err) {
+      console.error("Error liking post:", err);
+    }
+  };
+
+  const handleComment = async (postId) => {
+    const commentContent = commentInputs[postId];
+    if (!commentContent?.trim()) return;
+
+    try {
+      const response = await axios.post(
+        `http://localhost:5001/api/posts/${postId}/comment`,
+        { content: commentContent },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setPosts(
+        posts.map((post) => (post._id === postId ? response.data : post))
+      );
+      setCommentInputs({ ...commentInputs, [postId]: "" });
+    } catch (err) {
+      console.error("Error adding comment:", err);
+    }
+  };
+
+  const handleDeletePost = async (postId) => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+
+    try {
+      await axios.delete(`http://localhost:5001/api/posts/${postId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setPosts(posts.filter((post) => post._id !== postId));
+    } catch (err) {
+      console.error("Error deleting post:", err);
+      setError("Failed to delete post");
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return "just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  };
+
+  const getInitials = (name) => {
+    return name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "U";
+  };
+
+  // Get current user ID from token
+  const getCurrentUserId = () => {
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.id;
+    } catch {
+      return null;
+    }
+  };
+
+  const currentUserId = getCurrentUserId();
+
+  if (loading) {
+    return <div className="loading">Loading feed...</div>;
+  }
+
+  return (
+    <div className="feed-container">
+      <div className="feed-header">
+        <h1>📱 Social Feed</h1>
+        <button className="btn-logout" onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
+
+      {error && <div className="error">{error}</div>}
+
+      {/* Create Post */}
+      <div className="create-post-card">
+        <form className="create-post-form" onSubmit={handleCreatePost}>
+          <textarea
+            placeholder="What's on your mind?"
+            value={newPostContent}
+            onChange={(e) => setNewPostContent(e.target.value)}
+          />
+          <div className="create-post-actions">
+            <button
+              type="submit"
+              className="btn-post"
+              disabled={!newPostContent.trim()}
+            >
+              Post
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Posts Feed */}
+      <div className="feed-posts">
+        {posts.length === 0 ? (
+          <div className="post-card" style={{ textAlign: "center" }}>
+            <p style={{ color: "#65676b" }}>
+              No posts yet. Be the first to share something!
+            </p>
+          </div>
+        ) : (
+          posts.map((post) => (
+            <div key={post._id} className="post-card">
+              <div className="post-header">
+                <div className="post-avatar">
+                  {getInitials(post.author?.name)}
+                </div>
+                <div className="post-author-info">
+                  <div className="post-author-name">
+                    {post.author?.name || "Unknown User"}
+                  </div>
+                  <div className="post-date">{formatDate(post.createdAt)}</div>
+                </div>
+                {currentUserId === post.author?._id && (
+                  <button
+                    className="btn-delete"
+                    onClick={() => handleDeletePost(post._id)}
+                  >
+                    🗑️ Delete
+                  </button>
+                )}
+              </div>
+
+              <div className="post-content">{post.content}</div>
+
+              {post.image && (
+                <img
+                  src={post.image}
+                  alt="Post content"
+                  className="post-image"
+                />
+              )}
+
+              <div className="post-stats">
+                <span>👍 {post.likes?.length || 0} likes</span>
+                <span>💬 {post.comments?.length || 0} comments</span>
+              </div>
+
+              <div className="post-actions">
+                <button
+                  className={`post-action-btn ${
+                    post.likes?.includes(currentUserId) ? "liked" : ""
+                  }`}
+                  onClick={() => handleLike(post._id)}
+                >
+                  👍 Like
+                </button>
+                <button className="post-action-btn">💬 Comment</button>
+              </div>
+
+              {/* Comments Section */}
+              <div className="comments-section">
+                {post.comments?.map((comment, index) => (
+                  <div key={index} className="comment">
+                    <div className="comment-avatar">
+                      {getInitials(comment.author?.name)}
+                    </div>
+                    <div className="comment-content">
+                      <div className="comment-author">
+                        {comment.author?.name || "Unknown User"}
+                      </div>
+                      <div className="comment-text">{comment.content}</div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Add Comment */}
+                <div className="add-comment">
+                  <div className="comment-avatar">{getInitials("You")}</div>
+                  <input
+                    type="text"
+                    placeholder="Write a comment..."
+                    value={commentInputs[post._id] || ""}
+                    onChange={(e) =>
+                      setCommentInputs({
+                        ...commentInputs,
+                        [post._id]: e.target.value,
+                      })
+                    }
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        handleComment(post._id);
+                      }
+                    }}
+                  />
+                  {commentInputs[post._id] && (
+                    <button
+                      className="btn-comment"
+                      onClick={() => handleComment(post._id)}
+                    >
+                      Post
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default Feed;

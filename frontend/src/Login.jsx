@@ -21,8 +21,10 @@ function Login() {
       .then((res) => {
         // adapt to new controller responses (token or error)
         if (res.data && res.data.token) {
-          // logged in
-          navigate("/dashboard");
+          // Store token in localStorage
+          localStorage.setItem("token", res.data.token);
+          // Navigate to feed
+          navigate("/feed");
         } else if (res.data && res.data.Status === "Success") {
           if (res.data.role === "admin") navigate("/dashboard");
           else navigate("/");

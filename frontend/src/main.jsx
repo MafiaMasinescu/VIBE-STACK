@@ -1,18 +1,20 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import AboutPage from "./AboutPage.jsx";
 import Login from "./Login.jsx";
 import Dashboard from "./Dashboard.jsx";
 import Signup from "./Signup.jsx";
+import Feed from "./Feed.jsx";
 
 const Router = createBrowserRouter([
-  { path: "/", element: <App /> },
+  { path: "/", element: <Navigate to="/feed" /> },
   { path: "/about", element: <AboutPage /> },
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Signup /> },
   { path: "/dashboard", element: <Dashboard /> },
+  { path: "/feed", element: <Feed /> },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(

@@ -7,6 +7,7 @@ import { connectDB } from "./config/db.js";
 import rateLimiter from "./middleware/rateLimiter.js";
 
 import authRoutes from "./routes/authRoutes.js";
+import postRoutes from "./routes/postRoutes.js";
 
 dotenv.config();
 
@@ -18,7 +19,7 @@ const PORT = process.env.PORT;
 //middleware 
 // Allow cross-origin requests from Vite dev server and allow credentials (cookies)
 app.use(cors({
-    origin: "http://localhost:5173", // frontend URL
+    origin: ["http://localhost:5173", "http://localhost:5174"], // frontend URL
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
 }));
@@ -28,7 +29,7 @@ app.use(rateLimiter);
 
 app.use("/api/notes", notesRoutes);
 app.use("/auth", authRoutes);
-//app.use();
+app.use("/api/posts", postRoutes);
 
 
 
