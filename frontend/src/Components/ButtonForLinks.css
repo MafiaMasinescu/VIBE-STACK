@@ -1,0 +1,82 @@
+.button {
+  /* Visuals */
+  --btn-bg: linear-gradient(
+    180deg,
+    #5eead4 0%,
+    #34d399 100%
+  ); /* mint/teal gradient */
+  --btn-fg: #053e3b; /* dark text */
+  --btn-hover-bg: linear-gradient(180deg, #6eeed9 0%, #2fbf86 100%);
+  --btn-padding-y: 3rem;
+  --btn-padding-x: 6rem;
+  --btn-radius: 6px; /* slightly rounded rectangle */
+  --btn-shadow: 0 6px 14px rgba(16, 185, 129, 0.14);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-weight: 600;
+  font-size: 2rem;
+  border: none;
+  border-radius: var(--btn-radius);
+  box-shadow: var(--btn-shadow);
+  cursor: pointer;
+  transition: transform 180ms cubic-bezier(0.2, 0.9, 0.2, 1),
+    box-shadow 180ms ease, opacity 120ms ease;
+  text-decoration: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  background: var(--btn-hover-bg);
+  box-shadow: 0 10px 22px rgba(16, 185, 129, 0.16);
+}
+
+/* Keyboard focus target for accessibility */
+.button:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.22); /* blue focus ring */
+  outline-offset: 3px;
+}
+
+.button:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 10px rgba(16, 185, 129, 0.12);
+}
+
+.button[disabled],
+.button.disabled {
+  opacity: 0.56;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Respect reduced-motion setting */
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+}
+
+/* Small utility variants */
+.button.small {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.85rem;
+}
+.button.large {
+  padding: 2rem 4rem;
+  font-size: 1.05rem;
+}
+
+.buttonContainer {
+  gap: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

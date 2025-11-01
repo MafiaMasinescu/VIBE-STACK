@@ -1,0 +1,71 @@
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+
+export const registerUser = async (req, res) => {
+    // frontend sends { name, email, password }
+    const { name, email, password } = req.body;
+
+    try {
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: "name, email și password sunt obligatorii" });
+        }
+
+        // check by email uniqueness
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "Email already exists" });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({ name, email, password: hashedPassword });
+        await newUser.save();
+
+        return res.status(201).json({ message: "User created successfully" });
+    } catch (err) {
+        console.error("Error registering user:", err);
+        return res.status(500).json({ message: "Error registering user", error: err?.message });
+    }
+};
+
+export const loginUser = async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        if (!email || !password) {
+            return res.status(400).json({ message: "email și password sunt obligatorii" });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
+
+        if (!process.env.JWT_SECRET) {
+            console.warn("JWT_SECRET is missing from .env");
+        }
+
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "dev_secret", {
+            expiresIn: "1h",
+        });
+
+        // Optionally set cookie if you want to use cookie auth on the frontend
+        // res.cookie('token', token, { httpOnly: true });
+
+        return res.json({ token });
+    } catch (err) {
+        console.error("Error logging in:", err);
+        return res.status(500).json({ message: "Error logging in", error: err?.message });
+    }
+};
+
+export const getUsers = async (_, res) => {
+    try {
+        const users = (await User.find().sort({ createdAt: -1 })); // newest first
+        res.status(200).json(users);
+    } catch (error) {
+        console.error("Error in getUsers");
+        res.status(500).json({ message: "Internal server error" });
+    }
+}

@@ -1,0 +1,51 @@
+/* reset default browser margins so the page sits flush at the top */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+.Header {
+  background: rgba(7, 82, 66, 0.85); /* slightly darker semi-transparent */
+  color: #ffffff;
+  padding: 1rem 1.5rem; /* a bit smaller */
+  font-size: 1.6rem; /* smaller text */
+  font-weight: 600;
+  text-align: center;
+
+  margin: auto;
+  width: 90%; /* wider relative width */
+  max-width: 880px; /* larger max width */
+
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
+}
+
+.Paragraf {
+  background: rgba(52, 211, 153, 0.7); /* semi-transparent green */
+  border-radius: 12px; /* rounded background */
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+  color: #098360;
+  font-size: 1.2rem;
+  line-height: 1.4; /* adjusted line height */
+  max-width: 800px; /* wider width */
+  margin: 2rem auto;
+  padding: 1rem 2rem; /* adjusted padding for smaller height */
+  text-align: center; /* center the text */
+}
+
+.aboutPContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  margin-right: auto;
+  margin-left: auto;
+}
+.background {
+  background: #f0fdf4; /* light mint/teal background */
+  min-height: 100vh;
+  padding: 4rem 2rem;
+}
