@@ -69,3 +69,32 @@ export const getUsers = async (_, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 }
+
+export const getUserProfile = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        // Dynamically import Post model to avoid circular dependency
+        const Post = (await import("../models/Post.js")).default;
+        
+        // Get user info
+        const user = await User.findById(userId).select("-password");
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        
+        // Get user's posts
+        const posts = await Post.find({ author: userId })
+            .populate("author", "name email profilePhoto")
+            .populate("comments.author", "name email profilePhoto")
+            .sort({ createdAt: -1 });
+        
+        res.status(200).json({
+            user,
+            posts
+        });
+    } catch (error) {
+        console.error("Error in getUserProfile:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}

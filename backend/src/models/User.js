@@ -7,8 +7,16 @@ const UserSchema = new mongoose.Schema({
     role: {
         type: String,
         default: "visitor"
+    },
+    profilePhoto: {
+        type: String,
+        default: null
+    },
+    coverPhoto: {
+        type: String,
+        default: null
     }
-})
+}, { timestamps: true })
 
 const UserModel = mongoose.model("users", UserSchema)
 

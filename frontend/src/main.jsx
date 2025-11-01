@@ -7,6 +7,7 @@ import Login from "./Login.jsx";
 import Dashboard from "./Dashboard.jsx";
 import Signup from "./Signup.jsx";
 import Feed from "./Feed.jsx";
+import Profile from "./Profile.jsx";
 
 const Router = createBrowserRouter([
   { path: "/", element: <Navigate to="/feed" /> },
@@ -15,6 +16,7 @@ const Router = createBrowserRouter([
   { path: "/register", element: <Signup /> },
   { path: "/dashboard", element: <Dashboard /> },
   { path: "/feed", element: <Feed /> },
+  { path: "/profile/:userId", element: <Profile /> },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(

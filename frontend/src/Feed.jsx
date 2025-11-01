@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import "./Feed.css";
 
@@ -223,13 +223,27 @@ function Feed() {
           posts.map((post) => (
             <div key={post._id} className="post-card">
               <div className="post-header">
-                <div className="post-avatar">
-                  {getInitials(post.author?.name)}
-                </div>
-                <div className="post-author-info">
-                  <div className="post-author-name">
-                    {post.author?.name || "Unknown User"}
+                {post.author?._id ? (
+                  <Link to={`/profile/${post.author._id}`} className="post-avatar-link">
+                    <div className="post-avatar">
+                      {getInitials(post.author?.name)}
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="post-avatar">
+                    {getInitials(post.author?.name)}
                   </div>
+                )}
+                <div className="post-author-info">
+                  {post.author?._id ? (
+                    <Link to={`/profile/${post.author._id}`} className="post-author-name">
+                      {post.author?.name || "Unknown User"}
+                    </Link>
+                  ) : (
+                    <div className="post-author-name">
+                      {post.author?.name || "Unknown User"}
+                    </div>
+                  )}
                   <div className="post-date">{formatDate(post.createdAt)}</div>
                 </div>
                 {currentUserId === post.author?._id && (
@@ -277,21 +291,33 @@ function Feed() {
                     {(expandedComments[post._id]
                       ? post.comments
                       : post.comments.slice(0, 3)
-                    ).map((comment, index) => (
-                      <div key={index} className="comment">
-                        <div className="comment-avatar">
-                          {getInitials(comment.author?.name)}
-                        </div>
-                        <div className="comment-content">
-                          <div className="comment-author">
-                            {comment.author?.name || "Unknown User"}
+                      ).map((comment, index) => (
+                        <div key={index} className="comment">
+                          {comment.author?._id ? (
+                            <Link to={`/profile/${comment.author._id}`} className="comment-avatar-link">
+                              <div className="comment-avatar">
+                                {getInitials(comment.author?.name)}
+                              </div>
+                            </Link>
+                          ) : (
+                            <div className="comment-avatar">
+                              {getInitials(comment.author?.name)}
+                            </div>
+                          )}
+                          <div className="comment-content">
+                            {comment.author?._id ? (
+                              <Link to={`/profile/${comment.author._id}`} className="comment-author">
+                                {comment.author?.name || "Unknown User"}
+                              </Link>
+                            ) : (
+                              <div className="comment-author">
+                                {comment.author?.name || "Unknown User"}
+                              </div>
+                            )}
+                            <div className="comment-text">{comment.content}</div>
                           </div>
-                          <div className="comment-text">{comment.content}</div>
                         </div>
-                      </div>
-                    ))}
-
-                    {/* Show More/Less Button */}
+                      ))}                    {/* Show More/Less Button */}
                     {post.comments.length > 3 && (
                       <button
                         className="btn-show-comments"

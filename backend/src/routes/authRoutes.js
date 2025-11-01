@@ -1,5 +1,5 @@
 import express from "express";
-import { registerUser, loginUser, getUsers } from "../controllers/authController.js";
+import { registerUser, loginUser, getUsers, getUserProfile } from "../controllers/authController.js";
 
 const router = express.Router();
 
@@ -10,5 +10,8 @@ router.post("/register", registerUser);
 
 // POST /auth/login
 router.post("/login", loginUser);
+
+// GET /auth/profile/:userId - Get user profile with their posts
+router.get("/profile/:userId", getUserProfile);
 
 export default router;
