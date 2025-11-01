@@ -120,6 +120,25 @@ body {
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.25);
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  animation: scaleIn 0.6s ease-out;
+  transition: transform 0.3s ease;
+  border-radius: 8px;
+}
+
+.site-logo:hover {
+  transform: scale(1.1);
+}
+
 .feed-header h1 {
   margin: 0;
   font-size: 1.5rem;

@@ -4,6 +4,7 @@ import axios from "axios";
 import "./Feed.css";
 import UserList from "./Components/UserList";
 import GroupList from "./Components/GroupList";
+import logo from "./assets/my_icon.png";
 
 // Position hierarchy for each department
 const POSITION_HIERARCHY = {
@@ -317,7 +318,10 @@ function Feed() {
   return (
     <div className="feed-container">
       <div className="feed-header">
-        <h1>🌟 Connect & Share</h1>
+        <div className="header-left">
+          <img src={logo} alt="VibeMedia Logo" className="site-logo" />
+          <h1>VibeMedia</h1>
+        </div>
         <div className="header-actions">
           <button className="btn-profile" onClick={goToMyProfile}>
             <div className="profile-avatar-btn">
