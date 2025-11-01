@@ -82,6 +82,11 @@ export const toggleLike = async (req, res) => {
         }
 
         await post.save();
+        
+        // Populate author and comments author before sending response
+        await post.populate("author", "name email");
+        await post.populate("comments.author", "name email");
+        
         res.status(200).json(post);
     } catch (error) {
         console.error("Error in toggleLike:", error);
@@ -111,6 +116,9 @@ export const addComment = async (req, res) => {
         });
 
         await post.save();
+        
+        // Populate both author and comments author before sending response
+        await post.populate("author", "name email");
         await post.populate("comments.author", "name email");
         
         res.status(201).json(post);

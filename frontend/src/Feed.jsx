@@ -9,6 +9,7 @@ function Feed() {
   const [error, setError] = useState("");
   const [newPostContent, setNewPostContent] = useState("");
   const [commentInputs, setCommentInputs] = useState({});
+  const [expandedComments, setExpandedComments] = useState({});
   const navigate = useNavigate();
 
   // Get token from localStorage
@@ -129,6 +130,13 @@ function Feed() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
+  };
+
+  const toggleCommentsExpansion = (postId) => {
+    setExpandedComments({
+      ...expandedComments,
+      [postId]: !expandedComments[postId],
+    });
   };
 
   const formatDate = (dateString) => {
@@ -263,19 +271,41 @@ function Feed() {
 
               {/* Comments Section */}
               <div className="comments-section">
-                {post.comments?.map((comment, index) => (
-                  <div key={index} className="comment">
-                    <div className="comment-avatar">
-                      {getInitials(comment.author?.name)}
-                    </div>
-                    <div className="comment-content">
-                      <div className="comment-author">
-                        {comment.author?.name || "Unknown User"}
+                {post.comments && post.comments.length > 0 && (
+                  <>
+                    {/* Show only first 3 comments if not expanded */}
+                    {(expandedComments[post._id]
+                      ? post.comments
+                      : post.comments.slice(0, 3)
+                    ).map((comment, index) => (
+                      <div key={index} className="comment">
+                        <div className="comment-avatar">
+                          {getInitials(comment.author?.name)}
+                        </div>
+                        <div className="comment-content">
+                          <div className="comment-author">
+                            {comment.author?.name || "Unknown User"}
+                          </div>
+                          <div className="comment-text">{comment.content}</div>
+                        </div>
                       </div>
-                      <div className="comment-text">{comment.content}</div>
-                    </div>
-                  </div>
-                ))}
+                    ))}
+
+                    {/* Show More/Less Button */}
+                    {post.comments.length > 3 && (
+                      <button
+                        className="btn-show-comments"
+                        onClick={() => toggleCommentsExpansion(post._id)}
+                      >
+                        {expandedComments[post._id]
+                          ? `▲ Show less`
+                          : `▼ Show ${post.comments.length - 3} more comment${
+                              post.comments.length - 3 === 1 ? "" : "s"
+                            }`}
+                      </button>
+                    )}
+                  </>
+                )}
 
                 {/* Add Comment */}
                 <div className="add-comment">
