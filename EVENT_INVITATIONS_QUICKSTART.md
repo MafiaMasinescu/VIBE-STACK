@@ -7,20 +7,24 @@ The calendar event invitation feature has been successfully implemented. Here's 
 ## Features Added
 
 ### 1. **Invite Coworkers to Events**
+
 - Click the "Invite" button on any event in your calendar
 - Select a coworker from the dropdown
 - Send the invitation instantly
 
 ### 2. **Receive Invitations in Chat**
+
 - Invitations from coworkers appear at the top of your chat with them
 - Beautiful card design with event details (name, time, date, description)
 - Accept or decline with one click
 
 ### 3. **Automatic Calendar Sync**
+
 - When you accept an invitation, the event automatically appears in your calendar
 - No need to manually add the event
 
 ### 4. **See Who's Attending**
+
 - Every event shows an attendee count: `👥 2 people attending`
 - View full list of attendees below the event details
 - Visible to everyone (event creator and all attendees)
@@ -42,7 +46,7 @@ The calendar event invitation feature has been successfully implemented. Here's 
 1. **Open chat** with the person who invited you
 2. **See the invitation card** at the top of the chat
 3. **Review event details** (name, time, date)
-4. **Click "Accept"** 
+4. **Click "Accept"**
 5. ✅ Event is now in your calendar!
 
 ### Viewing Attendees
@@ -54,17 +58,20 @@ The calendar event invitation feature has been successfully implemented. Here's 
 ## Technical Details
 
 ### Backend
+
 - **New Model**: `CalendarInvitation` - stores all invitation data
 - **Updated Model**: `CalendarEvent` - now includes attendees array
 - **New Controller**: `invitationController.js` - handles all invitation logic
 - **New Routes**: `/api/invitations/*` - 5 new API endpoints
 
 ### Frontend
+
 - **Updated**: `Calendar.jsx` - invite button, modal, attendee display
 - **Updated**: `ChatBox.jsx` - invitation cards with accept/decline
 - **Enhanced CSS**: Beautiful animations and styling
 
 ### Files Modified
+
 ```
 backend/src/
   ├── models/CalendarInvitation.js (NEW)

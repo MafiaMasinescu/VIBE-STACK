@@ -42,7 +42,7 @@ function ChatBox({ selectedUser, onClose, currentUser }) {
         }
       );
       setMessages(response.data);
-      
+
       // Mark messages as read
       await axios.put(
         `http://localhost:5001/api/messages/read/${selectedUser._id}`,
@@ -141,12 +141,14 @@ function ChatBox({ selectedUser, onClose, currentUser }) {
   };
 
   const getInitials = (name) => {
-    return name
-      ?.split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) || "U";
+    return (
+      name
+        ?.split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2) || "U"
+    );
   };
 
   const formatTime = (dateString) => {
@@ -196,7 +198,8 @@ function ChatBox({ selectedUser, onClose, currentUser }) {
                   <div key={invitation._id} className="invitation-card">
                     <div className="invitation-header">
                       <span className="invitation-icon">📅</span>
-                      <strong>{invitation.senderName}</strong> invited you to an event
+                      <strong>{invitation.senderName}</strong> invited you to an
+                      event
                     </div>
                     <div className="invitation-details">
                       <div className="invitation-event-name">
@@ -208,7 +211,8 @@ function ChatBox({ selectedUser, onClose, currentUser }) {
                         </div>
                       )}
                       <div className="invitation-event-time">
-                        📍 {invitation.eventTime} on {new Date(invitation.eventDate).toLocaleDateString()}
+                        📍 {invitation.eventTime} on{" "}
+                        {new Date(invitation.eventDate).toLocaleDateString()}
                       </div>
                     </div>
                     <div className="invitation-actions">

@@ -5,7 +5,14 @@ import User from "../models/User.js";
 // Send event invitation
 export const sendInvitation = async (req, res) => {
   try {
-    const { recipientId, eventDate, eventName, eventDescription, eventTime, eventId } = req.body;
+    const {
+      recipientId,
+      eventDate,
+      eventName,
+      eventDescription,
+      eventTime,
+      eventId,
+    } = req.body;
     const senderId = req.userId;
 
     // Get sender details

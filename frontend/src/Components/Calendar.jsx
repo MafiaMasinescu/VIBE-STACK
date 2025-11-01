@@ -37,7 +37,7 @@ const Calendar = ({ userId, isOwner = false }) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  
+
   // Invitation states
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedEventForInvite, setSelectedEventForInvite] = useState(null);
@@ -747,7 +747,11 @@ const Calendar = ({ userId, isOwner = false }) => {
                             )}
                             {event.attendees && event.attendees.length > 0 && (
                               <span className="attendee-count">
-                                👥 {event.attendees.length} {event.attendees.length === 1 ? 'person' : 'people'} attending
+                                👥 {event.attendees.length}{" "}
+                                {event.attendees.length === 1
+                                  ? "person"
+                                  : "people"}{" "}
+                                attending
                               </span>
                             )}
                           </div>
@@ -805,19 +809,30 @@ const Calendar = ({ userId, isOwner = false }) => {
 
       {/* Invite Modal */}
       {showInviteModal && (
-        <div className="modal-overlay" onClick={() => setShowInviteModal(false)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setShowInviteModal(false)}
+        >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>Invite Coworker to Event</h2>
             {selectedEventForInvite && (
               <div className="invite-event-info">
-                <p><strong>Event:</strong> {selectedEventForInvite.name}</p>
-                <p><strong>Time:</strong> {formatTimeForDisplay(selectedEventForInvite.time)}</p>
+                <p>
+                  <strong>Event:</strong> {selectedEventForInvite.name}
+                </p>
+                <p>
+                  <strong>Time:</strong>{" "}
+                  {formatTimeForDisplay(selectedEventForInvite.time)}
+                </p>
                 {selectedEventForInvite.description && (
-                  <p><strong>Description:</strong> {selectedEventForInvite.description}</p>
+                  <p>
+                    <strong>Description:</strong>{" "}
+                    {selectedEventForInvite.description}
+                  </p>
                 )}
               </div>
             )}
-            
+
             <div className="form-group">
               <label>Select Coworker:</label>
               <select
